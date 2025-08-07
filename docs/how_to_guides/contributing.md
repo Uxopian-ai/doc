@@ -8,11 +8,11 @@ The recommended way to manage Prompts and Goals is to store them in OpenSearch u
 
 ### API Operations
 
-* **Create/Update a Prompt**: `POST /prompt`, `PUT /prompt`
-* **Create/Update a Goal**: `POST /goal`, `PUT /goal`
-* **List all Prompts/Goals**: `GET /prompt/all`, `GET /goal/all`
-* **Get a specific item**: `GET /prompt/{id}`, `GET /goal/{id}`
-* **Delete an item**: `DELETE /prompt/{id}`, `DELETE /goal/{id}`
+- **Create/Update a Prompt**: `POST /prompt`, `PUT /prompt`
+- **Create/Update a Goal**: `POST /goal`, `PUT /goal`
+- **List all Prompts/Goals**: `GET /prompt/all`, `GET /goal/all`
+- **Get a specific item**: `GET /prompt/{id}`, `GET /goal/{id}`
+- **Delete an item**: `DELETE /prompt/{id}`, `DELETE /goal/{id}`
 
 Refer to the Swagger UI documentation for a complete list of endpoints and detailed models.
 
@@ -47,10 +47,10 @@ curl -X POST http://localhost:8080/ai/goal \
 
 The templating engine is based on Thymeleaf and supports Spring Expression Language (SpEL), giving you powerful capabilities within your prompts.
 
-* **Accessing the Request Payload**: Use `${payload.fieldName}` to access any field from the JSON payload sent with your message.
-* **Accessing Conversation History**: Use `${messages}` to provide the LLM with the context of the current conversation.
-* **Using Conditional Logic**: Use SpEL for conditional logic, e.g., `[[${payload.language != null} ? ${payload.language} : 'english']]`.
-* **Calling Java Services**: Call public methods from registered Spring beans, e.g., `[[${documentService.extractTextualContent(payload.documentId)}]]`.
+- **Accessing the Request Payload**: Use `${payload.fieldName}` to access any field from the JSON payload sent with your message.
+- **Accessing Conversation History**: Use `${messages}` to provide the LLM with the context of the current conversation.
+- **Using Conditional Logic**: Use SpEL for conditional logic, e.g., `[[${payload.language != null} ? ${payload.language} : 'english']]`.
+- **Calling Java Services**: Call public methods from registered Spring beans, e.g., `[[${documentService.extractTextualContent(payload.documentId)}]]`.
 
 ## Examples of Prompt and Goal Definitions
 
@@ -74,8 +74,8 @@ goals:
 
 In this example, when the `compare` goal is triggered:
 
-* If the payload contains `documentType: 'contract'`, the `detailedComparison` prompt is used.
-* Otherwise, the `genericComparison` prompt is used as a fallback.
+- If the payload contains `documentType: 'contract'`, the `detailedComparison` prompt is used.
+- Otherwise, the `genericComparison` prompt is used as a fallback.
 
 ### Examples of Prompt Definitions
 
@@ -146,3 +146,21 @@ A `basePrompt` can be used to define the persona and core instructions for the A
     Your primary mission is to assist users by:
     Providing clear and precise answers...
 ```
+
+## Web Interface for Prompt and Goal Management
+
+In addition to the REST API, `uxopian-ai` includes a built-in web interface that lets you visually manage prompts.
+
+> 🖥️ **URL**: `https://<your-uxopian-endpoint>/ai`
+> Replace with your actual deployment host.
+
+Through this interface, you can:
+
+- View and search existing Prompts
+- Edit their fields (ID, content, filters, etc.)
+- Add new Prompts
+- Delete or reorder items interactively
+
+![uxopian-ai-web-interface](./uxopian-ai-web-interface.png)
+
+This interface is especially useful during development or testing phases where rapid iteration is required.

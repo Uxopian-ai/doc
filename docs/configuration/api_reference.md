@@ -1,16 +1,24 @@
-## Configuration & API
+# Configuration & API
 
 This section details how to configure the `uxopian-ai` service using `.yml` files and how to interact with it through its REST API.
 
-### Configuration Management
+---
 
-The framework uses a standard Spring Boot configuration model, making it flexible and easy to manage for different environments.
+## ⚙️ Configuration Management
 
-#### Configuration Files and Profiles
+The framework uses a standard **Spring Boot configuration model**, making it flexible and easy to manage across different environments.
 
-Configuration is primarily defined in `src/main/resources/application.yml`. You can override any property using environment variables, which is the recommended approach for Docker deployments.
+### 📁 Configuration Files and Profiles
 
-For managing multiple environments (e.g., development, production), you can use **Spring Profiles**. Define profile-specific properties in your `application.yml` like so:
+Configuration is primarily defined in:
+
+```bash
+src/main/resources/application.yml
+```
+
+You can override any property using **environment variables**, which is the recommended approach for Docker deployments.
+
+To manage multiple environments (e.g., development, production), use **Spring Profiles**:
 
 ```yaml
 # Default properties
@@ -21,7 +29,6 @@ uxopian:
     host: http://localhost:9200
 
 ---
-# Properties for the 'dev' profile
 spring:
   config:
     activate:
@@ -31,16 +38,14 @@ uxopian:
     host: http://dev-opensearch:9200
 ```
 
-#### LLM Provider Configuration
+### 🤖 LLM Provider Configuration
 
-You can select the default LLM provider and configure its credentials in your configuration files or via environment variables.
-
-Example:
+You can select the default LLM provider and configure its credentials in your configuration files or via environment variables:
 
 ```yaml
 uxopian:
   llm:
-    provider: openai # Sets the default provider
+    provider: openai
     openai:
       api-key: ${OPENAI_API_KEY}
     azure:
@@ -50,27 +55,81 @@ uxopian:
       api-key: ${ANTHROPIC_API_KEY}
 ```
 
-The available providers are: `openai`, `azure`, `anthropic`, `bedrock`, `gemini`, `huggingface`, `mistral`, and `ollama`. Each has its own set of required properties.
+✅ Supported providers:
 
-#### OpenSearch and Qdrant Settings
+- `openai`
+- `azure`
+- `anthropic`
+- `bedrock`
+- `gemini`
+- `huggingface`
+- `mistral`
+- `ollama`
 
-These settings control the connection to your persistence and vector store services.
+Each provider may have specific required fields.
+
+### 🔗 OpenSearch and Qdrant Settings
+
+These settings define your persistence and vector storage layers:
 
 ```yaml
 uxopian:
   opensearch:
     host: ${OPENSEARCH_HOST:http://localhost:9200}
-    index-prefix: ai # A prefix for all created indices
+    index-prefix: ai
   qdrant:
     enabled: true
     host: ${QDRANT_URL:http://localhost:6333}
     api-key: ${QDRANT_API_KEY:}
 ```
 
-> Disabling `qdrant` (`enabled: false`) will bypass vector search capabilities and RAG-based workflows.
+> Disabling `qdrant` (`enabled: false`) disables vector search and RAG-based features.
 
-### REST API Reference
+---
 
-All interactions with the `uxopian-ai` service are performed through its REST API. The API allows you to manage conversations, send messages, and configure entities like **Prompts** and **Goals**.
+## 🧩 Entities Bootstrapped from YAML
 
-For a complete and interactive list of all available endpoints, their parameters, and response models, please refer to the official [**Swagger UI**](https://iris.demos.uxopian.com/ai/swagger-ui.html) documentation provided with the service.
+At startup, `uxopian-ai` can automatically load Prompts and Goals from YAML files via `spring.config.import`. These imports are **merged** into OpenSearch using a strategy defined by the application:
+
+```yaml
+spring:
+  config:
+    import:
+      - "optional:classpath:prompts.yml"
+      - "optional:classpath:goals.yml"
+```
+
+### Merge Strategy Configuration
+
+Each YAML import uses one of the following strategies:
+
+| Strategy          | Prompts (by `id`)                           | Goals (by `name`)                         |
+| ----------------- | ------------------------------------------- | ----------------------------------------- |
+| `Override`        | Deletes all prompts, then recreates them    | Deletes all goals, then recreates them    |
+| `Merge`           | Merges missing values into existing prompts | Merges missing values into existing goals |
+| `CreateIfMissing` | Adds only new prompts                       | Adds only new goals                       |
+
+---
+
+## 🧪 REST API Reference
+
+All interactions with `uxopian-ai` go through its REST API, including:
+
+- Managing conversations and messages
+- CRUD operations on Prompts and Goals
+- Sending dynamic LLM requests
+
+For full documentation and testing:
+
+👉 Visit the [**Swagger UI**](https://iris.demos.uxopian.com/ai/swagger-ui.html)
+
+> The Swagger UI includes all routes, schemas, and live testing tools.
+
+---
+
+## ✅ Best Practices
+
+- 📌 Use environment variables for secrets and deployment-specific overrides
+- 📂 Version control your YAML configuration and backups
+- 🔁 Use the Merge/CreateIfMissing strategy during CI/CD deployments to preserve custom data
+- 🧪 Use Swagger UI to validate and explore all available endpoints interactively
