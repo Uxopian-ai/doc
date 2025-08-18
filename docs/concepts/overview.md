@@ -30,12 +30,12 @@ You can set a default model for the entire framework. This default can be overri
 
 ---
 
-## ⚖️ Parameter Precedence (Provider, Model & Temperature)
+## ⚖️ Parameter Precedence (Provider, Model, Temperature & Reasoning)
 
-When making a call to an LLM, you can specify the provider, model, and temperature at multiple levels. The framework uses a clear order of precedence to determine which values to use:
+When making a call to an LLM, you can specify the provider, model, temperature, and reasoning at multiple levels. The framework uses a clear order of precedence to determine which values to use:
 
 1. **API Call Parameters:**
-   Values for provider, model, or temperature passed directly in the request to the LLM endpoint will always be used first. This offers maximum flexibility for a single call.
+   Values for provider, model, temperature, or reasoning passed directly in the request to the LLM endpoint will always be used first. This offers maximum flexibility for a single call.
 
 2. **Prompt-Specific Defaults:**
    If a parameter is not specified in the API call, the framework will look for default values (`defaultLlmProvider`, `defaultLlmModel`) defined within the prompt itself.
@@ -96,6 +96,15 @@ They use the Thymeleaf engine, allowing for dynamic content using variables (e.g
 
 **Storage:**
 Prompts are stored and managed in OpenSearch. They can be created and updated via the REST API.
+
+**Key Attributes:**
+
+- `role`: Role of the prompt sender (e.g., USER, ASSISTANT, SYSTEM).
+- `content`: Content of the prompt.
+- `defaultLlmProvider`: The default LLM provider for the prompt (Used if no provider is specified in the API call).
+- `defaultLlmModel`: The default LLM model for the prompt (Used if no model is specified in the API call).
+- `temperature`: The default temperature for the prompt (Used if no temperature is specified in the API call).
+- `reasoningEnabled`: Whether reasoning is enabled for the prompt (Used if no reasoning setting is specified in the API call).
 
 ---
 

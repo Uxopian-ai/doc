@@ -22,20 +22,19 @@ To manage multiple environments (e.g., development, production), use **Spring Pr
 
 ```yaml
 # Default properties
-uxopian:
-  llm:
-    provider: openai
-  opensearch:
-    host: http://localhost:9200
+llm:
+  default:
+    model: ${LLM_DEFAULT_MODEL:gpt-3.5-turbo}
+    provider: ${LLM_DEFAULT_PROVIDER:openai}
+    base-prompt: ${LLM_DEFAULT_PROMPT:basePrompt}
 
 ---
 spring:
   config:
     activate:
       on-profile: dev
-uxopian:
-  opensearch:
-    host: http://dev-opensearch:9200
+opensearch:
+  host: http://dev-opensearch:9200
 ```
 
 ### 🤖 LLM Provider Configuration
@@ -43,16 +42,27 @@ uxopian:
 You can select the default LLM provider and configure its credentials in your configuration files or via environment variables:
 
 ```yaml
-uxopian:
-  llm:
-    provider: openai
-    openai:
-      api-key: ${OPENAI_API_KEY}
-    azure:
-      endpoint: https://your-azure-endpoint.openai.azure.com/
-      api-key: ${AZURE_OPENAI_API_KEY}
-    anthropic:
-      api-key: ${ANTHROPIC_API_KEY}
+llm:
+openai:
+  api-key: ${OPENAI_API_KEY:your-api-key}
+  model-name: gpt-3.5-turbo
+  temperature: 0.7
+  timeout: 60s
+  supported-models:
+    - gpt-4o
+    - gpt-4-turbo
+    - gpt-3.5-turbo
+    - dall-e-3
+
+gemini:
+  api-key: ${GEMINI_API_KEY:none}
+  model-name: gemini-1.5-pro-latest
+  temperature: 0.7
+  timeout: 60s
+  supported-models:
+    - gemini-1.5-pro-latest
+    - gemini-1.5-flash-latest
+    - gemini-pro
 ```
 
 ✅ Supported providers:
@@ -73,14 +83,13 @@ Each provider may have specific required fields.
 These settings define your persistence and vector storage layers:
 
 ```yaml
-uxopian:
-  opensearch:
-    host: ${OPENSEARCH_HOST:http://localhost:9200}
-    index-prefix: ai
-  qdrant:
-    enabled: true
-    host: ${QDRANT_URL:http://localhost:6333}
-    api-key: ${QDRANT_API_KEY:}
+opensearch:
+  host: ${OPENSEARCH_HOST:localhost}
+  port: ${OPENSEARCH_PORT:9200}
+  force-refresh-index: ${OPENSEARCH_FORCE_REFRESH_INDEX:false}
+qdrant:
+  url: ${QDRANT_URL:http://localhost:6333}
+  api-key: ${QDRANT_API_KEY:}
 ```
 
 > Disabling `qdrant` (`enabled: false`) disables vector search and RAG-based features.
