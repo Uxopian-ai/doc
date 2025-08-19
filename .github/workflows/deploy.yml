@@ -3,7 +3,7 @@ name: Deploy uxopian-ai documentation
 on:
   push:
     branches:
-      - main
+      - main  
 
 permissions:
   contents: write
@@ -20,21 +20,8 @@ jobs:
         with:
           python-version: 3.x
 
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
       - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Configure Git User
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+        run: pip install mkdocs-material
 
       - name: Deploy
         run: mkdocs gh-deploy --force
