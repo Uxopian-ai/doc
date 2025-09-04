@@ -37,7 +37,9 @@ nav:
   - 'Architecture': 'architecture/overview.md'
   - 'Concepts': 'concepts/overview.md'
   - 'Configuration': 'configuration/api_reference.md'
-  - 'Administration': 'administration/backup_recovery.md'
+  - 'Administration': 
+      - 'Backup and Recovery': 'administration/backup_recovery.md'
+      - 'Application Monitoring': 'administration/application_monitoring.md'
   - 'How-To Guides':
       - 'Contributing Prompts and Goals': 'how_to_guides/contributing.md'
       - 'Adding a New LLM Provider': 'how_to_guides/new_provider.md'
