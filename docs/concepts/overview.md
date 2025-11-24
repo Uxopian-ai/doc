@@ -1,122 +1,73 @@
-# 🧠 Core Concepts
+# **🧠 Core Concepts**
 
 This section explains the primary entities and concepts that form the **uxopian-ai** framework. Understanding these concepts is essential for effective configuration and interaction.
 
----
+## **🔐 Multi-Tenancy & Users**
 
-## 🔌 Providers
+**uxopian-ai** is built with a multi-tenant architecture from the ground up, allowing for secure and logical separation of data within a single deployment.
 
-A **Provider** is a connector to an external Large Language Model (LLM) service. The framework uses providers to abstract the specific implementation details of each LLM service, offering a unified interface.
+- **Tenants**: Every interaction is scoped to a specific tenantId . This ensures that conversations, stats, and configurations are isolated per tenant.
+- **Users**: Users are identified by an ID and assigned specific roles (including an admin flag) . This role-based access control governs access to the Admin API and sensitive operations.
 
-**Examples:** `openai`, `azure`, `anthropic`, `mistral`
+## **🔌 Providers & Models**
 
-**Configuration:**
-The active providers and their API keys are configured in your `.yml` files. This sets the global default.
+A **Provider** is a connector to an external Large Language Model (LLM) service. The framework uses providers to abstract the specific implementation details of each LLM service.
 
-**Extensibility:**
-You can add custom providers by implementing the `ModelProvider` Java interface.
+- **Providers**: You can retrieve a list of all configured providers (e.g., openai, azure, anthropic) via the API .
+- **Models**: Each provider supports specific models (e.g., gpt-4o, claude-3-5-sonnet). The framework is aware of model capabilities, specifically tracking if a model supports **multi-modal** inputs or **function calling** .
 
----
+## **⚖️ Parameter Precedence**
 
-## 🧠 Models
+When making a call to an LLM, you can specify configuration parameters at multiple levels. The framework uses a clear order of precedence to determine which values to use:
 
-A **Model** refers to a specific language model available through a provider. Each provider supports one or more models with different capabilities and costs.
+1. API Call Parameters:  
+   Values passed directly in the request (e.g., provider, model, temperature, requiresMultiModalConfig) will always take priority .
+2. Prompt-Specific Defaults:  
+   If a parameter is not specified in the API call, the framework looks for default values defined within the Prompt configuration (e.g., defaultLlmProvider, defaultLlmModel, requiresFunctionCallingModel) .
+3. Global Defaults:  
+   If no specific parameters are found in the API call or the prompt, the framework falls back to the global default values defined in the application configuration.
 
-**Examples:**
-`gpt-4o` (from OpenAI), `claude-3-5-sonnet-20240620` (from Anthropic)
+## **💬 Conversations**
 
-**Configuration:**
-You can set a default model for the entire framework. This default can be overridden at the prompt level or during an API call.
+A **Conversation** is a container that groups a sequence of exchanges between a user and the AI.
 
----
+- **Persistence**: Conversations are persistent entities with a title, update timestamp, and a record of the last used LLM provider and model .
+- **Context**: The framework automatically manages the context window, retrieving recent messages to ensure stateful interactions.
+- **Lifecycle**: Conversations can be listed, retrieved by ID, or deleted via the API .
 
-## ⚖️ Parameter Precedence (Provider, Model, Temperature & Reasoning)
+## **⇄ Requests & Inputs (Multi-Modal)**
 
-When making a call to an LLM, you can specify the provider, model, temperature, and reasoning at multiple levels. The framework uses a clear order of precedence to determine which values to use:
+A **Request** represents a single exchange (a "turn") within a conversation. Unlike simple text messages, **uxopian-ai** requests are rich and multi-modal.
 
-1. **API Call Parameters:**
-   Values for provider, model, temperature, or reasoning passed directly in the request to the LLM endpoint will always be used first. This offers maximum flexibility for a single call.
+- **Structure**: A request consists of a list of inputs (what was sent) and an answer (what the AI generated) .
+- **Multi-Modal Content**: The Input block supports various content types. It is not limited to text; it can handle image content or references to prompt IDs and goal names .
+  - **Dynamic Images**: The image input type also supports **Thymeleaf templating**, allowing you to dynamically inject image data (e.g., ).
+  - **Constraint**: If using templating for images, the expression **must resolve to a raw Base64 string** representing the image.
+- **Token Tracking**: Every request logs inputTokenCount and outputTokenCount for precise cost monitoring .
+- **Feedback**: Each request can be tagged with user feedback (Good, Bad, or Neutral) to help tune performance over time .
 
-2. **Prompt-Specific Defaults:**
-   If a parameter is not specified in the API call, the framework will look for default values (`defaultLlmProvider`, `defaultLlmModel`) defined within the prompt itself.
+## **📜 Prompts**
 
-3. **Global Defaults:**
-   If no specific parameters are found in either the API call or the prompt, the framework will fall back to the global default values defined in your `.yml` configuration files.
+A **Prompt** is a reusable, templated instruction sent to a model. Prompts are central to standardizing AI behavior.
 
----
+- **Templating**: Prompts use a templating engine (Thymeleaf) allowing for dynamic variable injection.
+- **Configuration**: Beyond the text content, a prompt stores configuration flags like reasoningDisabled, requiresMultiModalModel, and requiresFunctionCallingModel .
+- **ROI Estimation**: Prompts include a timeSaved attribute (in seconds). This is used to calculate the Return on Investment (ROI) by estimating how much human time is saved every time the prompt is used .
 
-## 💬 Conversations
+## **🎯 Goals**
 
-A **Conversation** is a container that groups a sequence of exchanges between a user and the AI. It maintains the context and history of the interaction.
+A **Goal** is a high-level orchestration unit. It decouples the user's intent from the specific prompt used, allowing for dynamic selection based on context.
 
-**Persistence:**
-Conversations and their associated messages are stored in OpenSearch.
+- **Logic**: A goal maps a goalName to a specific promptId based on a filter expression .
+- **Filtering**: The filter typically uses Spring Expression Language (SpEL) to evaluate the payload (e.g., ).
+- **Priority**: Goals have an index property, allowing you to define priority order when multiple goals might match a scenario .
 
-**Context:**
-The framework automatically retrieves recent messages from the current conversation to provide context for new requests, enabling stateful interactions.
+## **📊 Analytics & Statistics**
 
-**Key Attributes:**
+**uxopian-ai** includes a comprehensive analytics engine accessible via the Admin API.
 
-- `title`: The title of the conversation.
-- `updatedAt`: Timestamp of the last interaction.
-- `llmProvider`: The last LLM provider used in the conversation.
-- `llmModel`: The last LLM model used.
-
----
-
-## ✉️ Messages
-
-A **Message** represents a single turn in a conversation. It can be a user's query or the AI's response. When sending a message, you can provide one of the following (processed in order of priority):
-
-- `goalName`: To execute a high-level task.
-- `promptId`: To use a specific, pre-defined prompt.
-- `content`: A simple, direct text query.
-
-**Persistence:**
-All messages are stored in OpenSearch, linked to their parent conversation.
-
-**Key Attributes:**
-
-- `content`: The initial content/question of the message.
-- `answer`: The response generated by the LLM.
-- `promptRole`: The role of the message sender (user, assistant, or system).
-- `createdAt`: Timestamp of when the message was created.
-- `inputTokenCount` & `outputTokenCount`: The number of tokens used, for cost tracking.
-- `llmName`: The name of the language model that processed the message.
-- `feedback`: An optional ID linking to user feedback on the response.
-
----
-
-## 📜 Prompts
-
-A **Prompt** is a reusable, templated instruction sent to a model to guide its response. Prompts are the core building blocks for interacting with LLMs.
-
-**Templating:**
-They use the Thymeleaf engine, allowing for dynamic content using variables (e.g., `${payload.documentId}`) and advanced logic.
-
-**Storage:**
-Prompts are stored and managed in OpenSearch. They can be created and updated via the REST API.
-
-**Key Attributes:**
-
-- `role`: Role of the prompt sender (e.g., USER, ASSISTANT, SYSTEM).
-- `content`: Content of the prompt.
-- `defaultLlmProvider`: The default LLM provider for the prompt (Used if no provider is specified in the API call).
-- `defaultLlmModel`: The default LLM model for the prompt (Used if no model is specified in the API call).
-- `temperature`: The default temperature for the prompt (Used if no temperature is specified in the API call).
-- `reasoningEnabled`: Whether reasoning is enabled for the prompt (Used if no reasoning setting is specified in the API call).
-
----
-
-## 🎯 Goals
-
-A **Goal** is a high-level, reusable task that orchestrates which Prompt to use based on a given context. A goal is essentially a mapping between a specific situation (defined by a filter) and a specific prompt.
-
-**Example Use Case:**
-A goal named `compare` could use the `detailedComparison` prompt if the document type is a `contract`, but use the `genericComparison` prompt otherwise.
-
-**Filtering:**
-The filter logic uses Spring Expression Language (SpEL) to evaluate the context sent in the API call's payload.
-
-**Storage:**
-Like prompts, goals are stored and managed in OpenSearch.
+- **Global Stats**: Tracks total conversations, requests, tokens, and aggregated time saved .
+- **Time Series**: Provides activity data (requests, tokens, time saved) aggregated by time intervals (e.g., DAY) to visualize trends .
+- **Adoption & ROI**:
+  - **Feature Adoption**: Tracks the usage rate of advanced features like multi-modal and function calling .
+  - **Time Saved**: Ranks prompts by the total estimated hours they have saved users .
