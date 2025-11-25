@@ -22,18 +22,25 @@ The unique **Goal** system enables dynamic prompt selection based on context —
 ✅ **Complete Conversation Management**
 Persistent conversations with cost tracking, response regeneration, and user feedback support.
 
-✅ **Simplified Extensibility**
-Easily add custom LLM connectors or template helpers through a clean, plugin-style architecture.
+✅ **Data-Driven Insights**
+A comprehensive admin panel to monitor ROI, token usage, and adoption trends.
 
 ---
 
 ## 🔍 Key Features at a Glance
 
-### ⚙️ Effortless Integration
+### ⚙️ Effortless & Scalable Integration
 
 - **Standalone Service**: Deployable via Docker or as a Java 21 application.
+- **Multi-Tenant Architecture**: Designed for internal deployments with clear logical separation and distinct tenant management.
 - **Web-Component UI**: Lightweight, embeddable components for any web app.
 - **Rich REST API**: Fully documented (Swagger) for seamless integration.
+
+### 📊 Powerful Admin & Analytics
+
+- **Granular Token Monitoring**: Visualize input and output token consumption globally, by specific users, or per conversation.
+- **ROI & Efficiency Tracking**: specific metrics allow you to view the number of times a prompt is used and estimate the total time saved.
+- **Usage Trends**: Analyze activity over time (requests per week), monitor LLM model distribution, and track the adoption of advanced features like multi-modal capabilities.
 
 ### 🧠 Intelligent Orchestration
 
@@ -52,7 +59,7 @@ Easily add custom LLM connectors or template helpers through a clean, plugin-sty
 ### 💬 Complete Conversation Management
 
 - **Persistent History**: Conversations and messages are stored with full context.
-- **Cost & Feedback Tracking**: Monitor token usage and gather user feedback.
+- **Feedback Loop**: Gather specific user feedback (Good/Bad/Neutral) on responses to improve prompt quality.
 - **Rich UX**: Regenerate, copy, and manage conversation content easily.
 
 ---

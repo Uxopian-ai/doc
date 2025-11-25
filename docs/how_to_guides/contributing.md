@@ -1,40 +1,76 @@
-# How to Contribute Prompts and Goals
+# 🛠️ How to Contribute Prompts and Goals
 
 This guide explains how to manage Prompts and Goals and how to use advanced templating features to make them powerful and dynamic.
 
-## Managing Prompts and Goals via the API
+For a visual guide on managing these resources via the UI, please refer to the [**Admin Interface Guide**](how_to_use_admin_interface#contribute_prompt).
+
+---
+
+## 📡 Managing Prompts and Goals via the API
 
 The recommended way to manage Prompts and Goals is to store them in OpenSearch using the REST API. This allows for dynamic updates without restarting the service.
 
+> **⚠️ Security Note:**
+> These are **Admin** operations. Your Gateway must inject the `X-User-Roles: admin` header for these requests to succeed.
+
 ### API Operations
 
-- **Create/Update a Prompt**: `POST /prompt`, `PUT /prompt`
-- **Create/Update a Goal**: `POST /goal`, `PUT /goal`
-- **List all Prompts/Goals**: `GET /prompt/all`, `GET /goal/all`
-- **Get a specific item**: `GET /prompt/{id}`, `GET /goal/{id}`
-- **Delete an item**: `DELETE /prompt/{id}`, `DELETE /goal/{id}`
+Refer to the Swagger documentation for the complete schema details.
 
-Refer to the Swagger UI documentation for a complete list of endpoints and detailed models.
+**Prompts**
 
-## Example: Creating a New Prompt
+- **Save a Prompt**: `POST /api/v1/admin/prompts`
+- **Update a Prompt**: `PUT /api/v1/admin/prompts`
+- **Get a Specific Prompt**: `GET /api/v1/admin/prompts/{id}`
+- **Delete a Prompt**: `DELETE /api/v1/admin/prompts/{id}`
+
+**Goals**
+
+- **Save a Goal**: `POST /api/v1/admin/goals`
+- **Update a Goal**: `PUT /api/v1/admin/goals`
+- **Get All Goals**: `GET /api/v1/admin/goals`
+- **Delete a Goal**: `DELETE /api/v1/admin/goals/{id}`
+
+---
+
+## 📝 Example: Creating a New Prompt
+
+Use this endpoint to store a prompt configuration, including its default LLM settings.
+
+**cURL Request**
 
 ```bash
-curl -X POST http://localhost:8080/ai/prompt \
+curl -X POST "http://localhost:8080/api/v1/admin/prompts" \
 -H "Content-Type: application/json" \
+-H "X-User-TenantId: enterprise-corp-a" \
+-H "X-User-Id: admin-user" \
+-H "X-User-Roles: admin" \
 -d '{
   "id": "summarizeDocumentText",
   "role": "user",
   "content": "Summarize the following document in a plain text format:\n\n[[${documentService.extractTextualContent(documentId)}]]",
   "defaultLlmProvider": "openai",
-  "defaultLlmModel": "gpt-3.5-turbo"
+  "defaultLlmModel": "gpt-3.5-turbo",
+  "timeSaved": 60
 }'
 ```
 
-## Example: Creating a New Goal
+_Note: The `timeSaved` field (in seconds) is used to calculate ROI stats in the admin panel._
+
+---
+
+## 🎯 Example: Creating a New Goal
+
+A Goal maps a specific context to a prompt ID.
+
+**cURL Request**
 
 ```bash
-curl -X POST http://localhost:8080/ai/goal \
+curl -X POST "http://localhost:8080/api/v1/admin/goals" \
 -H "Content-Type: application/json" \
+-H "X-User-TenantId: enterprise-corp-a" \
+-H "X-User-Id: admin-user" \
+-H "X-User-Roles: admin" \
 -d '{
   "goalName": "compare",
   "promptId": "detailedComparison",
@@ -43,124 +79,109 @@ curl -X POST http://localhost:8080/ai/goal \
 }'
 ```
 
-## Using Advanced Template Functions
+---
 
-The templating engine is based on Thymeleaf and supports Spring Expression Language (SpEL), giving you powerful capabilities within your prompts.
+## ⚡ Using Advanced Template Functions
+
+The templating engine is based on **Thymeleaf** and supports **Spring Expression Language (SpEL)**, giving you powerful capabilities within your prompts.
 
 - **Accessing the Request Payload**: Use `${payload.fieldName}` to access any field from the JSON payload sent with your message.
 - **Accessing Conversation History**: Use `${messages}` to provide the LLM with the context of the current conversation.
 - **Using Conditional Logic**: Use SpEL for conditional logic, e.g., `[[${payload.language != null} ? ${payload.language} : 'english']]`.
 - **Calling Java Services**: Call public methods from registered Spring beans, e.g., `[[${documentService.extractTextualContent(payload.documentId)}]]`.
 
-## Examples of Prompt and Goal Definitions
+---
 
-Here are some practical examples of Goals and Prompts to illustrate these features.
+## 💡 Examples of Prompt and Goal Definitions
 
-### Example of a Goal Definition
+Here are practical examples of how to structure your Goal and Prompt logic.
 
-A Goal maps a situation to a specific prompt. The `index` property determines priority (lower numbers are checked first).
+### 1\. Goal Logic (Orchestration)
 
-```yaml
-goals:
-  map:
-    compare:
-      - promptId: detailedComparison
-        filter: "[[${documentType == 'contract'}]]"
-        index: 125
-      - promptId: genericComparison
-        filter: "true" # Fallback prompt
-        index: 1000
+Goals use the `index` property to determine priority (lower numbers are checked first) and a `filter` to match the context.
+
+**Logic:**
+
+1.  Check if `documentType` is 'contract'. If yes, use `detailedComparison`.
+2.  Otherwise, fall back to `genericComparison`.
+
+<!-- end list -->
+
+```json
+[
+  {
+    "goalName": "compare",
+    "promptId": "detailedComparison",
+    "filter": "[[${documentType == 'contract'}]]",
+    "index": 125
+  },
+  {
+    "goalName": "compare",
+    "promptId": "genericComparison",
+    "filter": "true",
+    "index": 1000
+  }
+]
 ```
 
-In this example, when the `compare` goal is triggered:
+### 2\. Prompt: Conditional Logic
 
-- If the payload contains `documentType: 'contract'`, the `detailedComparison` prompt is used.
-- Otherwise, the `genericComparison` prompt is used as a fallback.
+This prompt uses a SpEL expression to dynamically set the target language.
 
-### Examples of Prompt Definitions
+```text
+Translate the following document in [[${language != null} ? ${language} : 'english']]:
 
-#### 1. Basic Prompt with a Service Call
-
-```yaml
-- id: summarizeDocumentText
-  role: user
-  content: |
-    Summarize the following document in a plain text format:
-
-    [[${documentService.extractTextualContent(documentId)}]]
+[[${documentService.extractTextualContent(documentId)}]]
 ```
 
-#### 2. Prompt with Conditional Logic
+### 3\. Prompt: Iteration
 
-This prompt uses a SpEL expression to dynamically set the translation language.
+This prompt iterates over a list of document IDs from the payload to compare multiple documents within a single request.
 
-```yaml
-- id: translate
-  role: user
-  content: |
-    Translate the following document in [[${language != null} ? ${language} : 'english']]:
+```text
+Please be exhaustive and provide a very detailed, point-by-point comparison.
+Compare the following documents:
 
-    [[${documentService.extractTextualContent(documentId)}]]
+[# th:each="docId, iterStat : ${documentIds}"]
+Document content [[${iterStat.count}]] : [[${documentService.extractTextualContent(docId)}]]
+[/]
 ```
 
-#### 3. Prompt with Iteration
+### 4\. Prompt: Composition (Prompt-in-Prompt)
 
-This prompt iterates over a list of document IDs from the payload to compare multiple documents.
+A prompt can call another prompt. Here, `summarizeDocumentMarkdown` reuses the formatting rules defined in a separate prompt named `markdownResponse`.
 
-```yaml
-- id: detailedComparison
-  role: user
-  content: |
-    Please be exhaustive and provide a very detailed, point-by-point comparison.
-    Compare the following documents:
+```text
+Summarize the following document.
+[[${promptService.renderPrompt('markdownResponse')}]]
 
-    [# th:each="docId, iterStat : ${documentIds}"]
-    Document content [[${iterStat.count}]] : [[${documentService.extractTextualContent(docId)}]]
-    [/]
+Document content:
+[[${documentService.extractTextualContent(documentId)}]]
 ```
 
-#### 4. Prompt Composition
+### 5\. Prompt: System Persona
 
-A prompt can call another prompt. Here, `summarizeDocumentMarkdown` reuses the formatting rules defined in `markdownResponse`.
+A generic `basePrompt` can be used to define the persona and core instructions for the AI.
 
-```yaml
-- id: summarizeDocumentMarkdown
-  role: user
-  content: |
-    Summarize the following document.
-    [[${promptService.renderPrompt('markdownResponse')}]]
-
-    Document content:
-      [[${documentService.extractTextualContent(documentId)}]]
+```text
+You are Nono. You were born in 2025.
+Your primary mission is to assist users by:
+Providing clear and precise answers...
 ```
 
-#### 5. System-level Prompt
+---
 
-A `basePrompt` can be used to define the persona and core instructions for the AI across the application.
+## 🖥️ Web Interface for Prompt Management
 
-```yaml
-- id: basePrompt
-  role: SYSTEM
-  content: |
-    You are Nono. You were born in 2025, you are non-binary...
-    Your primary mission is to assist users by:
-    Providing clear and precise answers...
-```
+In addition to the REST API, **uxopian-ai** includes a built-in web interface that lets you visually manage prompts.
 
-## Web Interface for Prompt and Goal Management
-
-In addition to the REST API, `uxopian-ai` includes a built-in web interface that lets you visually manage prompts.
-
-> 🖥️ **URL**: `https://<your-uxopian-endpoint>/ai`
-> Replace with your actual deployment host.
+> 🔗 **Access**: `https://<your-uxopian-endpoint>/ai`
 
 Through this interface, you can:
 
-- View and search existing Prompts
-- Edit their fields (ID, content, filters, etc.)
-- Add new Prompts
-- Delete or reorder items interactively
+- View and search existing Prompts.
+- Edit their fields (Content, Filters, Model Settings).
+- Add new Prompts.
+- Delete or reorder items interactively.
 
-![uxopian-ai-web-interface](./uxopian-ai-web-interface.png)
-
-This interface is especially useful during development or testing phases where rapid iteration is required.
+For a full walkthrough of the interface, see the [**Admin Interface Guide**](https://www.google.com/search?q=how_to_use_admin_interface%23contribute_prompt).

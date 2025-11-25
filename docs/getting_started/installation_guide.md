@@ -1,167 +1,119 @@
 # 📦 Installation Guide
 
-This guide provides instructions for deploying the **uxopian-ai** service. We will cover the recommended **Docker-based deployment** and the manual **Java application setup**.
+This guide provides instructions for deploying the **uxopian-ai** service. We cover two methods:
+
+1.  **Docker Compose (Recommended):** Deploys the full stack (AI Service, Gateway, OpenSearch) using a provided starter kit.
+2.  **Java Application:** Manual deployment for specific custom environments.
 
 ---
 
-## 🐳 Docker Deployment _(Recommended)_
+## 🐳 Docker Deployment (Recommended)
 
-Deploying with Docker is the recommended method as it provides a consistent and isolated environment.
+The easiest way to get started is using the provided Docker Compose starter kit. This sets up the AI service, a secured Gateway, and a dedicated OpenSearch node for vector storage.
 
-### 🔹 Step 1: Pull the Docker Image
+### 🔹 Step 1: Download the Starter Kit
 
-Pull the official uxopian-ai image from the Arondor Artifactory:
+Download the [uxopian-ai_docker_example.zip](./uxopian-ai_docker_example.zip) archive from the release repository.
 
-```bash
-docker pull artifactory.arondor.cloud:5001/uxopian-ai/ai-standalone
+**Archive Structure:**
+Once extracted, you will see the following structure. This folder contains the stack definition and all necessary configuration files.
+
+```text
+uxopian-ai_docker_example
+├── config
+│   ├── application.yml             # Core application settings
+│   ├── goals.yml                   # Predefined AI goals
+│   ├── llm-clients-config.yml      # LLM Provider settings (OpenAI, Azure, etc.)
+│   ├── mcp-server.yml              # Model Context Protocol settings
+│   ├── metrics.yml                 # Observability configuration
+│   ├── opensearch.yml              # Vector database connection config
+│   └── prompts.yml                 # System prompts definitions
+├── gateway-application.yaml        # Configuration for the API Gateway
+└── uxopian-ai-stack.yml            # Docker Compose definition
 ```
 
-### 🔹 Step 2: Understand Configuration
+### 🔹 Step 2: Pull the Docker Images
 
-The service is configured through a set of `.yml` files (`application.yml`, `opensearch.yml`, `llm-clients-config.yml`, etc.). You can override any configuration parameter by setting an environment variable when running the container.
-
-> 📌 For example, the OpenSearch host is defined in `opensearch.yml` as:
->
-> ```yml
-> host: ${OPENSEARCH_HOST:localhost}
-> ```
->
-> You can set the `OPENSEARCH_HOST` environment variable to specify your server's address.
-
-#### 🔧 Key Environment Variables to Configure
-
-**OpenSearch Connection:**
-
-- `OPENSEARCH_HOST`: The hostname of your OpenSearch server.
-- `OPENSEARCH_PORT`: The port for your OpenSearch instance (default: `9200`).
-
-**LLM Provider API Keys:**
-
-- `OPENAI_API_KEY`: Your API key for OpenAI.
-- `ANTHROPIC_API_KEY`: Your API key for Anthropic.
-  _(See `llm-clients-config.yml` for all provider variables)_
-
-**Default LLM:**
-
-- `LLM_DEFAULT_PROVIDER`: The default provider to use (e.g., `openai`).
-- `LLM_DEFAULT_MODEL`: The default model to use (e.g., `gpt-4o`).
-
-**Server Port:**
-
-- `UXOPIAN_AI_PORT`: The port on which the service will run inside the container (default: `8080`).
-
-### 🔹 Step 3: Run the Container
-
-Run the Docker container, mapping the port and passing the necessary environment variables.
-
-#### 🧪 Example Command:
-
-This example runs the service on port 8080 and connects it to an OpenSearch instance.
+Ensure you have access to the Artifactory and pull the required images.
 
 ```bash
-docker run --rm \
-  -p 8080:8080 \
-  -e OPENSEARCH_HOST="your_opensearch_host" \
-  -e OPENSEARCH_PORT="9200" \
-  -e OPENAI_API_KEY="your_openai_api_key" \
-  --name uxopian-ai \
-  artifactory.arondor.cloud:5001/uxopian-ai/ai-standalone
+docker pull artifactory.arondor.cloud:5001/uxopian-ai/ai-standalone:latest
+docker pull artifactory.arondor.cloud:5001/uxopian-ai/gateway:latest
+# OpenSearch is pulled from the public registry automatically by the compose file
 ```
+
+!!! note "Image Tags"
+You may need to update the `image:` fields in `uxopian-ai-stack.yml` to match the full path of the images you just pulled (e.g., replace `image: 'ai-standalone'` with `artifactory.arondor.cloud:5001/uxopian-ai/ai-standalone:latest`).
+
+### 🔹 Step 3: Configuration
+
+Before starting the stack, you must configure your LLM providers and environment.
+
+#### 1\. LLM API Keys
+
+Edit `config/llm-clients-config.yml` to add your API keys (e.g., OpenAI, Anthropic), or pass them as environment variables in the `uxopian-ai-stack.yml` file.
+
+#### 2\. Service Configuration
+
+The `uxopian-ai-stack.yml` file orchestrates three services:
+
+- **OpenSearch:** Stores vector embeddings.
+- **Gateway:** Handles routing and exposure (Port `8085`).
+- **AI Standalone:** The core intelligence engine.
+
+**Key Environment Variables in `uxopian-ai-stack.yml`:**
+
+| Variable                 | Description                        | Default / Example                                   |
+| :----------------------- | :--------------------------------- | :-------------------------------------------------- |
+| `OPENSEARCH_HOST`        | Hostname of the vector DB          | `uxopian-ai-opensearch-node1` (Internal Docker DNS) |
+| `UXOPIAN_AI_PORT`        | Internal port for the AI service   | `8080`                                              |
+| `APP_BASE_URL`           | URL where the gateway is reachable | `http://localhost:8085`                             |
+| `SPRING_PROFILES_ACTIVE` | Active Spring profile              | `dev` (Disables authentication for testing)         |
+
+!!! warning "Production Warning"
+The example stack uses `SPRING_PROFILES_ACTIVE=dev`, which **disables authentication**. For production deployments, remove this variable and configure proper security in the gateway.
+
+For a detailed reference of every file inside the `config/` directory, please refer to the [Configuration Files documentation](https://www.google.com/search?q=../configuration/config_files.md).
+
+### 🔹 Step 4: Start the Stack
+
+Navigate to the extracted folder and start the services.
+
+```bash
+docker-compose -f uxopian-ai-stack.yml up -d
+```
+
+**Verification:**
+
+- **Gateway:** Accessible at `http://localhost:8085`
+- **Health Check:** `http://localhost:8085/uxopian-ai/actuator/health`
 
 ---
 
 ## ☕ Java Application Deployment
 
-You can also run the service directly as a Java application.
+If you cannot use Docker, you can run the service directly as a Java application.
 
-### 🔹 Step 1: Download the Application Package
+!!! important "Prerequisites" \* **Java 21 Runtime Environment (JRE)** installed. \* **OpenSearch 2.x** installed and running separately.
+
+### 🔹 Step 1: Download the Package
 
 Download the installation ZIP file from the Arondor Artifactory:
+🔗 `ai-standalone-[version].zip`
 
-🔗 [ai-standalone-2025.0.0.zip](https://artifactory.arondor.cloud/artifactory/arondor-snapshot/com/uxopian/ai-standalone/2025.0.0-SNAPSHOT/ai-standalone-2025.0.0.zip)
+### 🔹 Step 2: Configure
 
-### 🔹 Step 2: Configure the Service
+1.  Unzip the package.
+2.  Navigate to the `config` directory.
+3.  Edit `opensearch.yml` to point to your existing OpenSearch instance.
+4.  Edit `llm-clients-config.yml` to provide your API keys.
 
-- Unzip the package.
-- Navigate to the `config` directory.
-- Edit the `.yml` files (`opensearch.yml`, `llm-clients-config.yml`, etc.) to match your environment.
+Detailed configuration options are available here: [Configuration Files](../configuration/config_files.md).
 
-> ⚠️ You must at least configure your OpenSearch connection and provide the necessary API keys for the LLM providers you intend to use.
+### 🔹 Step 3: Run
 
-### 🔹 Step 3: Run the Application
-
-From the root of the unzipped directory, start the service using the Java 21 runtime:
+From the root of the unzipped directory, execute:
 
 ```bash
-java -jar ai-standalone-2025.0.0.jar
+java -jar ai-standalone.jar
 ```
-
----
-
-## 💻 Client-Side Integration
-
-Once the **uxopian-ai** service is running, you must configure your client application to communicate with it.
-
-### 🧩 ARender Integration
-
-**Download the Integration Package:**
-📦 `arender-iris-2025.0.0-SNAPSHOT.zip` from Arondor Artifactory.
-
-**Deploy Files:**
-Place the files next to `arondor-arender-hmi-spring-boot-[current_version].jar`. Front-end configs load automatically.
-
-**Configure the Endpoint:**
-Open `arender-custom-client.properties` and locate:
-
-```properties
-uxopian.ai.host=http://localhost:8080/ai
-```
-
-Update the URL to match your running **uxopian-ai** service.
-
-### 🧩 FlowerDocs Integration
-
-**Download the Integration Package:**
-📦 `flowerdocs-iris-2025.0.0-SNAPSHOT.zip` from Arondor Artifactory.
-
-**Deploy Files:**
-Unzip the package and integrate configuration files into your FlowerDocs instance.
-
-**Configure the Endpoint:**
-Open the following file:
-
-```js
-./conf/Script/consts/consts
-```
-
-Find and update this line:
-
-```js
-const UXO_AI_ENDPOINT = "https://iris.demos.uxopian.com/ai";
-```
-
-Replace the URL with your own service endpoint.
-
----
-
-## 🌐 Integration in Other Applications
-
-To integrate the **uxopian-ai** front-end components into any other web application:
-
-### 🔹 Step 1: Download the Web Components Package
-
-📦 `web-components-[current-version].zip` from the Artifactory.
-
-### 🔹 Step 2: Import the Assets
-
-Include the CSS and JavaScript in your HTML:
-
-```html
-<!-- Add the stylesheet to your <head> -->
-<link rel="stylesheet" href="/path/to/uxopian-ai-styles.css" />
-
-<!-- Add the script at the end of your <body> -->
-<script src="/path/to/uxopian-ai-components.js"></script>
-```
-
-Once imported, you'll have access to all **uxopian-ai** web components.

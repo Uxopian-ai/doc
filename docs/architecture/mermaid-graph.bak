@@ -3,6 +3,10 @@ graph TD
         Client[Client Application: e.g. ARender, FlowerDocs]
     end
 
+    subgraph "Security Layer"
+        BFF[BFF / Gateway: Handles Auth & Header Injection]
+    end
+
     subgraph "uxopian-ai Service"
         Service[ai-standalone: Spring Boot Application]
     end
@@ -14,10 +18,15 @@ graph TD
         LLM[External LLM Providers: OpenAI, Azure, etc.]
     end
 
-    Client -- REST API Request --> Service
+    Client -- REST API Request --> BFF
+    BFF -- Proxies Request (Adds X-User headers) --> Service
+    
     Service -- Stores & Retrieves Data --> OpenSearch
     Service -- Fetches document content: e.g. documentService.extractTextualContent --> Rendition
     Service -- (Optional) RAG/Vector Search --> Qdrant
     Service -- Sends Prompts --> LLM
+    
     LLM -- Returns Completions --> Service
-    Service -- API Response --> Client
+    
+    Service -- API Response --> BFF
+    BFF -- Proxies Response --> Client
