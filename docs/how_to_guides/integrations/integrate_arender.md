@@ -142,8 +142,8 @@ try {
             inputs: [{
                 role: 'user',
                 content: [{
-                    type: 'prompt',
-                    promptId: 'summarizeDocMd',
+                    type: 'PROMPT',
+                    value: 'summarizeDocMd',
                     payload: {
                         // Pass the current document ID to the backend
                         documentId: $wnd.getARenderJS().getCurrentDocumentId()
