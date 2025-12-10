@@ -147,7 +147,7 @@ This file manages the connection to various AI providers.
 llm:
   default:
     provider: ${LLM_DEFAULT_PROVIDER:openai}
-    model: ${LLM_DEFAULT_MODEL:gpt-4o}
+    model: ${LLM_DEFAULT_MODEL:gpt-5-mini}
     base-prompt: ${LLM_DEFAULT_PROMPT:basePrompt}
 
   context: ${LLM_CONTEXT_SIZE:10} # Sliding window size (number of messages)
@@ -162,20 +162,50 @@ llm:
 ```yml
 openai:
   api-key: ${OPENAI_API_KEY:}
-  model-name: gpt-3.5-turbo
-  temperature: 0.7
+  model-name: gpt-5-mini
+  temperature: 1
   timeout: 60s
   max-retries: 3
   supported-models:
+    - modelName: gpt-5.1
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gpt-5
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gpt-5-mini
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gpt-5-nano
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gpt-4.1
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gpt-4.1-mini
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gpt-4.1-nano
+      multi-modal-supported: true
+      function-call-supported: true
     - modelName: gpt-4o
       multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gpt-4o-mini
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gpt-4-turbo
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: o3-mini
+      multi-modal-supported: false
+      function-call-supported: true
+    - modelName: o4-mini
+      multi-modal-supported: false
       function-call-supported: true
     - modelName: gpt-3.5-turbo
       multi-modal-supported: false
       function-call-supported: true
-    - modelName: dall-e-3
-      multi-modal-supported: false
-      function-call-supported: false
 ```
 
 #### **☁️ Azure OpenAI**
@@ -230,14 +260,26 @@ bedrock:
 ```yml
 gemini:
   api-key: ${GEMINI_API_KEY:none}
-  model-name: gemini-1.5-pro-latest
+  model-name: gemini-2.5-flash
   supported-models:
-    - modelName: gemini-1.5-pro-latest
+    - modelName: gemini-3-pro-preview
+      function-call-supported: true
+      multi-modal-supported: true
+    - modelName: gemini-2.5-flash
       multi-modal-supported: false
       function-call-supported: true
-    - modelName: gemini-1.5-flash-latest
-      multi-modal-supported: false
+    - modelName: gemini-2.5-flash-lite
       function-call-supported: true
+      multi-modal-supported: true
+    - modelName: gemini-2.5-pro
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gemini-2.0-flash
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gemini-2.0-flash-lite
+      multi-modal-supported: false
+      function-call-supported: false
 ```
 
 #### **🤗 HuggingFace**
