@@ -162,7 +162,7 @@ llm:
 ```yml
 openai:
   api-key: ${OPENAI_API_KEY:}
-  model-name: gpt-5-mini
+  model-name: gpt-5
   temperature: 1
   timeout: 60s
   max-retries: 3
