@@ -108,7 +108,7 @@ When running Uxopian-ai in a containerized environment, the best practice is to 
 
 ```dockerfile
 # Start from the specific version of Uxopian-ai
-FROM artifactory.arondor.cloud:5001/uxopian-ai:2025.0.0
+FROM artifactory.arondor.cloud:5001/uxopian-ai:v2026.0.0-ft1-rc2-full
 
 # Copy your custom helper Fat JAR into the loader directory
 COPY ./target/my-custom-helper-1.0-SNAPSHOT.jar /app/helper-services/

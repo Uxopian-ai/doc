@@ -10,14 +10,14 @@ theme:
   custom_dir: custom_theme
   palette:
     - scheme: default
-      primary: '#3A3A8D'
-      accent: '#3EB650'
+      primary: "#3A3A8D"
+      accent: "#3EB650"
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - scheme: slate
-      primary: '#3A3A8D'
-      accent: '#3EB650'
+      primary: "#3A3A8D"
+      accent: "#3EB650"
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
@@ -33,33 +33,35 @@ extra_css:
   - extra.css
 
 nav:
-  - 'Getting Started': 'getting_started/installation_guide.md'
-  - 'Release Notes': 
-    - 'v2025.0.0': 'release_notes/v2025.0.0.md'
-  - 'Architecture': 'architecture/overview.md'
-  - 'Concepts': 'concepts/overview.md'
-  - 'Configuration': 
-      - 'Config files': 'configuration/config_files.md'
-      - 'API Reference': 'configuration/api_references.md'
-  - 'Administration': 
-      - 'Admin Interface':
-        - 'Dashboard': 'administration/interface/index.md'
-        - 'Prompts': 'administration/interface/prompts.md'
-        - 'Statistics': 'administration/interface/statistics.md'
-        - 'Users': 'administration/interface/users.md'
-      - 'Backup and Recovery': 'administration/backup_recovery.md'
-      - 'Application Monitoring': 'administration/application_monitoring.md'
-  - 'How-To Guides':
-      - 'Contributing Prompts and Goals': 'how_to_guides/contributing.md'
-      - 'Common Operational Tasks': 'how_to_guides/common_operational_tasks.md'
-      - 'Intgrations': 
-        - 'Adding FlowerDocs features': 'how_to_guides/integrations/integrate_flowerdocs.md'
-        - 'Adding ARender features': 'how_to_guides/integrations/integrate_arender.md'
-        - 'Adding Uxopian-ai features into a Basic Web Page': 'how_to_guides/integrations/integrate_web_page.md'
-      - 'Extensions':
-        - 'Adding a New LLM Provider': 'how_to_guides/extensions/new_provider.md'
-        - 'How to Create Custom Prompt Helpers' : 'how_to_guides/extensions/create_custom_helpers.md'
-        - 'Adding Custom Auth Providers': 'how_to_guides/extensions/custom_auth_provider.md'
+  - "Getting Started": "getting_started/installation_guide.md"
+  - "Release Notes":
+      - "v2026.0.0-ft1-rc2": "release_notes/v2026.0.0-ft1-rc2.md"
+  - "Architecture": "architecture/overview.md"
+  - "Concepts": "concepts/overview.md"
+  - "Configuration":
+      - "Config files": "configuration/config_files.md"
+      - "API Reference": "configuration/api_references.md"
+  - "Administration":
+      - "Admin Interface":
+          - "Dashboard": "administration/interface/index.md"
+          - "Prompts": "administration/interface/prompts.md"
+          - "Statistics": "administration/interface/statistics.md"
+          - "Users": "administration/interface/users.md"
+      - "Backup and Recovery": "administration/backup_recovery.md"
+      - "Application Monitoring": "administration/application_monitoring.md"
+  - "How-To Guides":
+      - "Contributing Prompts and Goals": "how_to_guides/contributing.md"
+      - "Common Operational Tasks": "how_to_guides/common_operational_tasks.md"
+      - "Intgrations":
+          - "Adding FlowerDocs features": "how_to_guides/integrations/integrate_flowerdocs.md"
+          - "Adding ARender features": "how_to_guides/integrations/integrate_arender.md"
+          - "Adding Uxopian-ai features into a Basic Web Page": "how_to_guides/integrations/integrate_web_page.md"
+      - "Extensions":
+          - "Adding a New LLM Provider": "how_to_guides/extensions/new_provider.md"
+          - "How to Create Custom Prompt Helpers": "how_to_guides/extensions/create_custom_helpers.md"
+          - "How to Create Advanced Prompt Helpers": "how_to_guides/extensions/create_advanced_helpers.md"
+          - "How to Create Custom Tools": "how_to_guides/extensions/create_custom_tools.md"
+          - "Adding Custom Auth Providers": "how_to_guides/extensions/custom_auth_provider.md"
 
 markdown_extensions:
   - pymdownx.highlight:
