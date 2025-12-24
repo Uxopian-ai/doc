@@ -32,12 +32,6 @@ You must include the `maven-shade-plugin` configured to exclude Spring Boot star
          xsi:schemaLocation="[http://maven.apache.org/POM/4.0.0](http://maven.apache.org/POM/4.0.0) [http://maven.apache.org/xsd/maven-4.0.0.xsd](http://maven.apache.org/xsd/maven-4.0.0.xsd)">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.uxopian.ai.gateway</groupId>
-        <artifactId>gateway</artifactId>
-        <version>2025.0.0-SNAPSHOT</version>
-    </parent>
-
     <artifactId>my-custom-auth-provider</artifactId>
 
     <dependencies>
@@ -212,7 +206,7 @@ You must use the **Gateway Service** base image (different from the core AI imag
 
 ```dockerfile
 # Start from the Gateway Service image
-FROM artifactory.arondor.cloud:5001/uxopian-ai/gateway-service:2025.0.0
+FROM artifactory.arondor.cloud:5001/uxopian-ai/gateway-service:2026.0.0-ft1-rc2-full
 
 # Copy your custom Auth Provider Fat JAR into the provider directory
 COPY ./target/my-custom-auth-provider-1.0-SNAPSHOT.jar /app/provider/
