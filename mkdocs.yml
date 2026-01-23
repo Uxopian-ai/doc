@@ -33,7 +33,9 @@ extra_css:
   - extra.css
 
 nav:
-  - "Getting Started": "getting_started/installation_guide.md"
+  - "Getting Started":
+      - "Installation Guide": "getting_started/installation_guide.md"
+      - "Installation with ARender": "getting_started/installation_guide_arender.md"
   - "Release Notes":
       - "v2026.0.0-ft1-rc2": "release_notes/v2026.0.0-ft1-rc2.md"
   - "Architecture": "architecture/overview.md"
