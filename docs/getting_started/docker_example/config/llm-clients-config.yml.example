@@ -1,0 +1,163 @@
+openai:
+  api-key: ${OPENAI_API_KEY:}
+  model-name: gpt-3.5-turbo
+  temperature: 0.7
+  timeout: 60s
+  max-retries: 3
+  supported-models:
+    - modelName: gpt-4o
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gpt-4-turbo
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gpt-3.5-turbo
+      multi-modal-supported: false
+      function-call-supported: true
+    - modelName: dall-e-3
+      multi-modal-supported: false
+      function-call-supported: false
+
+anthropic:
+  api-key: ${ANTHROPIC_API_KEY:none}
+  base-url: https://api.anthropic.com/v1/
+  model-name: claude-3-5-sonnet-20240620
+  temperature: 0.7
+  max-retries: 3
+  timeout: 60s
+  supported-models:
+    - modelName: claude-3-5-sonnet-20240620
+      multi-modal-supported: false
+      function-call-supported: true
+    - modelName: claude-3-opus-20240229
+      multi-modal-supported: false
+      function-call-supported: true
+    - modelName: claude-3-haiku-20240307
+      multi-modal-supported: false
+      function-call-supported: true
+
+azure:
+  openai:
+    api-key: ${AZURE_OPENAI_API_KEY:none}
+    endpoint: https://your-resource.openai.azure.com/
+    deployment-name: your-deployment-name
+    temperature: 0.7
+    max-retries: 3
+    timeout: 60s
+    model-name: gpt-4o
+    supported-models:
+      - modelName: your-gpt4o-deployment
+        multi-modal-supported: false
+        function-call-supported: true
+      - modelName: your-gpt35-deployment
+        multi-modal-supported: false
+        function-call-supported: true
+
+bedrock:
+  aws:
+    access-key: ${BEDROCK_AWS_ACCESS_KEY:none}
+    secret-key: ${BEDROCK_AWS_SECRET_KEY:none}
+    region: us-east-1
+  model-id: anthropic.claude-3-sonnet-20240229-v1:0
+  timeout: 60s
+  max-retries: 3
+  default-model-name: anthropic.claude-3-sonnet-20240229-v1
+  supported-models:
+    - modelName: anthropic.claude-3-sonnet-20240229-v1:0
+      multi-modal-supported: false
+      function-call-supported: true
+    - modelName: anthropic.claude-3-haiku-20240307-v1:0
+      multi-modal-supported: false
+      function-call-supported: true
+    - modelName: cohere.command-r-plus-v1:0
+      multi-modal-supported: false
+      function-call-supported: true
+
+gemini:
+  api-key: ${GEMINI_API_KEY:AIzaSyCx-XO70_yeTwG-EdZ02Nt5ozLFuROJ1Dc}
+  model-name: gemini-1.5-pro-latest
+  temperature: 0.7
+  max-retries: 3
+  timeout: 60s
+  supported-models:
+    - modelName: gemini-2.5-flash
+      multi-modal-supported: false
+      function-call-supported: true
+    - modelName: gemini-1.5-pro-latest
+      multi-modal-supported: false
+      function-call-supported: true
+    - modelName: gemini-1.5-flash-latest
+      multi-modal-supported: false
+      function-call-supported: true
+    - modelName: gemini-pro
+      multi-modal-supported: false
+      function-call-supported: true
+
+huggingface:
+  api-key: ${HUGGINGFACE_API_KEY:none}
+  model-name: mistralai/Mistral-7B-Instruct-v0.3
+  temperature: 0.7
+  timeout: 60s
+  supported-models:
+    - modelName: mistralai/Mistral-7B-Instruct-v0.3
+      multi-modal-supported: false
+      function-call-supported: true
+    - modelName: meta-llama/Meta-Llama-3-8B-Instruct
+      multi-modal-supported: false
+      function-call-supported: true
+    - modelName: google/gemma-2-9b-it
+      multi-modal-supported: false
+      function-call-supported: true
+
+mistral:
+  api-key: ${MISTRAL_API_KEY:none}
+  base-url: https://api.mistral.ai/v1/
+  model-name: open-mistral-7b
+  temperature: 0.7
+  max-retries: 3
+  timeout: 60s
+  supported-models:
+    - modelName: open-mistral-7b
+      multi-modal-supported: false
+      function-call-supported: true
+    - modelName: open-mixtral-8x7b
+      multi-modal-supported: false
+      function-call-supported: true
+    - modelName: mistral-small-latest
+      multi-modal-supported: false
+      function-call-supported: true
+    - modelName: mistral-large-latest
+      multi-modal-supported: false
+      function-call-supported: true
+    - modelName: open-codestral-latest
+      multi-modal-supported: false
+      function-call-supported: true
+
+ollama:
+  base-url: http://localhost:11434
+  model-name: llama3
+  temperature: 0.7
+  max-retries: 3
+  top-p: 1.0
+  timeout: 60s
+  supported-models:
+    - modelName: llama3
+      multi-modal-supported: false
+      function-call-supported: true
+    - modelName: llama2
+      multi-modal-supported: false
+      function-call-supported: true
+    - modelName: codellama
+      multi-modal-supported: false
+      function-call-supported: true
+
+nu-extract:
+      api-key: ${NUEXTRACT_API_KEY:}
+      base-url: https://nuextract.ai/api/projects/
+      model-name: nu-extract-accident-report
+      timeout: 60s
+      supported-models:
+        - modelName: nu-extract-accident-report
+          multi-modal-supported: false
+          function-call-supported: false
+          model-id: c13ef081-1791-4882-8ba9-2d2ade17b0e2
