@@ -1,0 +1,38 @@
+llm:
+  # Default LLM configuration (provider, model)
+  default:
+    model: ${LLM_DEFAULT_MODEL:gpt-4o}
+    provider: ${LLM_DEFAULT_PROVIDER:openai}
+    base-prompt: ${LLM_DEFAULT_PROMPT:basePrompt}
+
+  # Default context size (history length)
+  context: ${LLM_CONTEXT_SIZE:10}
+  debug:
+    enabled: ${LLM_DEBUG:false}
+# Settings specific to the OpenAI provider
+openai:
+  # API key pulled from environment variables (required)
+  api-key: ${OPENAI_API_KEY:}
+
+  # Default model for OpenAI if not specified elsewhere
+  model-name: gpt-3.5-turbo
+
+  # Generation parameters
+  temperature: 0.7
+  timeout: 60s
+  max-retries: 3
+
+  # List of available models and their features
+  supported-models:
+    - modelName: gpt-4o
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gpt-4-turbo
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gpt-3.5-turbo
+      multi-modal-supported: false
+      function-call-supported: true
+    - modelName: dall-e-3
+      multi-modal-supported: false
+      function-call-supported: false
