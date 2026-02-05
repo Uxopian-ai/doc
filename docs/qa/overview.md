@@ -52,6 +52,27 @@ Documentation: [https://docs.ai.uxopian.com/how_to_guides/integrations/integrate
 * Switching LLM providers is supported (within the list of providers supported by Uxopian AI).
 * Most customers rely on a system integrator/partner to implement the connectors once, then reuse them across deployments.
 
+## Can I use Xopia to trigger AI agents, instead of a "flat" LLM-based conversation.
+
+The term “agent” is still understood in different ways. Uxopian AI will allow later in 2026 to declare new agents. when it comes to integrating existing ones, let's separate two use cases:
+
+**1) Conversational agents (chat-based agent services).**  
+If your “agent” exposes a messaging / chat API (and runs its own reasoning loop), you can use the Uxopian Assistant UI to converse with it by implementing a **provider / model class** that connects to that agent, the same way a provider/model would connect to an LLM endpoint. From the UI standpoint, it remains a normal assistant conversation; under the hood, the “model” is your agent service. See the How to Guides section for this.
+
+**2) Action agents (agents that execute tasks).**  
+If your “agent” is something you call to perform an action (redaction, metadata updates, lookups, update customer in CRM,  etc.) rather than a chat endpoint, then the right concept is a **Tool / Function Calling** integration. Uxopian AI can invoke declared tools behind the scenes when the user asks for actions (e.g., “Redact these documents and remove addresses”).  
+See: https://docs.ai.uxopian.com/how_to_guides/extensions/create_custom_tools/  
+We also plan to add a direct MCP bridge later this year.
+
+## Can I connect customer-developed LLM endpoints (or proprietary AI services) in Xopia?
+
+Yes. Customer-developed LLM endpoints (or proprietary AI services) can be integrated by implementing a **provider / model connector** so that Xopia routes calls to that endpoint. This can be used either as a classical LLM provider, or to connect to a conversational-agent service (chat/messaging API) presented as a “model” to the Assistant UI.
+
+## Do we have an internal paper about “agents” in Uxopian AI?
+
+Not at the moment as a single dedicated paper. The most authoritative references today are the extension documentation (custom tools, and provider/model extensions). We will integrate the concept of agent later in 2026 in Uxopian AI framework.
+
+
 
 
 
