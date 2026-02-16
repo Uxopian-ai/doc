@@ -25,6 +25,8 @@ theme:
     features:
         - navigation.tabs
         - navigation.top
+        - navigation.sections
+        - navigation.path
         - search.suggest
         - search.highlight
         - content.code.copy
@@ -33,38 +35,44 @@ extra_css:
     - extra.css
 
 nav:
+    - Home: index.md
     - "Getting Started":
-          - "Installation Guide": "getting_started/installation_guide.md"
-          - "Installation with ARender": "getting_started/installation_guide_arender.md"
-    - "Release Notes":
-          - "v2026.0.0-ft1-rc2": "release_notes/v2026.0.0-ft1-rc2.md"
-    - "Architecture": "architecture/overview.md"
-    - "Concepts": "concepts/overview.md"
-    - "Configuration":
-          - "Config files": "configuration/config_files.md"
-          - "API Reference": "configuration/api_references.md"
-    - "Administration":
-          - "Admin Interface":
-                - "Dashboard": "administration/interface/index.md"
-                - "Prompts": "administration/interface/prompts.md"
-                - "Statistics": "administration/interface/statistics.md"
-                - "Users": "administration/interface/users.md"
-          - "Backup and Recovery": "administration/backup_recovery.md"
-          - "Application Monitoring": "administration/application_monitoring.md"
+          - "Quick Start": "getting_started/quickstart.md"
+          - "Deploy with Docker": "getting_started/installation_guide.md"
+          - "Deploy with Docker + ARender": "getting_started/installation_guide_arender.md"
+    - "Understanding Uxopian-ai":
+          - "Architecture Overview": "understanding/architecture.md"
+          - "Core Concepts": "understanding/concepts.md"
+          - "The Templating Engine": "understanding/templating.md"
+          - "Security Model (BFF Pattern)": "understanding/security.md"
     - "How-To Guides":
-          - "Contributing Prompts and Goals": "how_to_guides/contributing.md"
-          - "Common Operational Tasks": "how_to_guides/common_operational_tasks.md"
-          - "Intgrations":
-                - "Adding FlowerDocs features": "how_to_guides/integrations/integrate_flowerdocs.md"
-                - "Adding ARender features": "how_to_guides/integrations/integrate_arender.md"
-                - "Adding Uxopian-ai features into a Basic Web Page": "how_to_guides/integrations/integrate_web_page.md"
-          - "Extensions":
-                - "Adding a New LLM Provider": "how_to_guides/extensions/new_provider.md"
-                - "How to Create Custom Prompt Helpers": "how_to_guides/extensions/create_custom_helpers.md"
-                - "How to Create Advanced Prompt Helpers": "how_to_guides/extensions/create_advanced_helpers.md"
-                - "How to Create Custom Tools": "how_to_guides/extensions/create_custom_tools.md"
-                - "Adding Custom Auth Providers": "how_to_guides/extensions/custom_auth_provider.md"
-    - "Q&A": "qa/overview.md"
+          - "Managing Prompts and Goals": "how_to/managing_prompts_goals.md"
+          - "Using the REST API": "how_to/api_usage.md"
+          - "Integrating with ARender": "how_to/integrate_arender.md"
+          - "Integrating with FlowerDocs": "how_to/integrate_flowerdocs.md"
+          - "Embedding in a Web Page": "how_to/integrate_web_page.md"
+          - "Backup and Recovery": "how_to/backup_recovery.md"
+          - "Monitoring Performance": "how_to/monitoring.md"
+    - "Extending Uxopian-ai":
+          - "Creating Custom Helpers": "extending/custom_helpers.md"
+          - "Creating Advanced Helpers": "extending/advanced_helpers.md"
+          - "Creating Custom Tools": "extending/custom_tools.md"
+          - "Adding a New LLM Provider": "extending/new_provider.md"
+          - "Adding a Custom Auth Provider": "extending/custom_auth_provider.md"
+    - "Reference":
+          - "Configuration Files": "reference/config_files.md"
+          - "REST API": "reference/api.md"
+          - "Environment Variables": "reference/env_variables.md"
+    - "Admin Panel":
+          - "Dashboard": "admin/dashboard.md"
+          - "Prompt Management": "admin/prompts.md"
+          - "LLM Provider Management": "admin/llm_providers.md"
+          - "Statistics & ROI": "admin/statistics.md"
+          - "User Management": "admin/users.md"
+    - "FAQ": "faq.md"
+    - "Release Notes":
+          - "v2026.0.0-ft2": "release_notes/v2026.0.0-ft2.md"
+          - "v2026.0.0-ft1-rc2": "release_notes/v2026.0.0-ft1-rc2.md"
 
 markdown_extensions:
     - pymdownx.highlight:
@@ -75,3 +83,10 @@ markdown_extensions:
     - pymdownx.snippets
     - pymdownx.superfences
     - admonition
+    - pymdownx.details
+    - attr_list
+    - md_in_html
+    - tables
+    - pymdownx.emoji:
+          emoji_index: !!python/name:material.extensions.emoji.twemoji
+          emoji_generator: !!python/name:material.extensions.emoji.to_svg
