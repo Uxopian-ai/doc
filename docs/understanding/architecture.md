@@ -8,7 +8,7 @@ This section provides insight into the framework's design, covering both the hig
 
 The **uxopian-ai** framework is designed as a backend microservice that sits behind a security gateway. It is composed of several key components working in concert.
 
-![Component Architecture](./mermaid-graph.png)
+![Component Architecture](mermaid-graph.png)
 
 ### Component Descriptions
 
@@ -17,11 +17,14 @@ User-facing application (e.g., **ARender**, **FlowerDocs**) that initiates reque
 It never communicates directly with **uxopian-ai**.
 
 **BFF / Gateway (Security Layer)**
-Entry point for all traffic. Responsible for:
+Entry point for all traffic. The Gateway is a **standalone, independently deployed service** built on **Spring Cloud Gateway** (reactive) with a pluggable auth provider system. Responsible for:
 
-- Authenticating the user (SSO, OAuth, etc.)
-- Injecting security headers (`X-User-TenantId`, `X-User-Id`, `X-User-Roles`)
-- Proxying the request to the backend service
+- **Authenticating** the user via a pluggable provider (OAuth2, JWT, LDAP, or the `DevProvider` for development)
+- **Enriching** requests with identity headers (`X-User-TenantId`, `X-User-Id`, `X-User-Roles`, `X-User-Token`)
+- **Enforcing** role-based access control (e.g., admin-only paths)
+- **Proxying** the request to the backend service
+
+The Gateway processes each request through a filter pipeline: `DefaultProviderHeaderFilter` (route matching) → `AuthFilter` (authentication + header injection) → Spring Cloud Gateway (routing). See [Security Model](security.md) for the full pipeline details and provider reference.
 
 **uxopian-ai Service**
 The core of the framework. This standalone Java application:
@@ -58,7 +61,7 @@ The request flow emphasizes the role of the **BFF** in establishing the security
 
 ### Sequence Diagram: Executing a Goal
 
-## ![Sequence Diagram](./mermaid-sequence.png)
+## ![Sequence Diagram](mermaid-sequence.png)
 
 ## Workflow Steps
 

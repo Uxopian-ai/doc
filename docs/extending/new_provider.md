@@ -169,58 +169,62 @@ public class FakeStreamingChatModel implements StreamingChatModel {
 
 Finally, create the **Service** that registers your provider with Uxopian-ai. This class implements `ModelProvider` and acts as a factory for your models.
 
-**Crucial:** You must annotate this class with `@Service("your-provider-name")`. This name is what you will use in the API calls (e.g., `provider=fake-llm`).
+**Crucial:** You must annotate this class with `@Service("your-provider-name")`. This name is what you will use in the API calls and provider configurations (e.g., `provider=fake-llm`).
+
+!!! tip "Recommended: Extend `AbstractLlmClient`"
+    Instead of implementing `ModelProvider` directly, extend `AbstractLlmClient`. It provides the `applyIfNotNull(value, setter)` helper method for cleanly applying optional configuration parameters from `LlmModelConf`.
 
 **Example: `FakeLLMClient.java`**
 
 ```java
 package com.uxopian.ai.fakellm.client;
 
-import java.util.List;
 import org.springframework.stereotype.Service;
-import com.uxopian.ai.model.llm.connector.ModelProperties;
-import com.uxopian.ai.model.llm.connector.ModelProvider;
+import com.uxopian.ai.model.llm.connector.AbstractLlmClient;
+import com.uxopian.ai.model.llm.connector.LlmModelConf;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 
-@Service("fake-llm") // <--- This ID is used in API calls
-public class FakeLLMClient implements ModelProvider {
+@Service("fake-llm") // <--- This ID is used in API calls and provider configurations
+public class FakeLLMClient extends AbstractLlmClient {
 
     @Override
-    public String getDefaultModelName() {
-        return "fake-gpt-v1";
+    public ChatModel createChatModelInstance(LlmModelConf params) {
+        // Use params to access all configuration: model name, API key, temperature, etc.
+        return new FakeChatModel(params.getModelName());
     }
 
     @Override
-    public List<ModelProperties> getSupportedModels() {
-        // Define capabilities (MultiModal, Function Calling, etc.)
-        return List.of(
-            new ModelProperties("fake-gpt-v1", false, false),
-            new ModelProperties("fake-gpt-advanced", true, true)
-        );
-    }
-
-    @Override
-    public ChatModel createChatModelInstance(String modelName) {
-        // Factory: Return your custom logic implementation
-        return new FakeChatModel(resolveModelName(modelName));
-    }
-
-    @Override
-    public StreamingChatModel createStreamingChatModelInstance(String modelName) {
-        // Factory: Return your custom streaming implementation
-        return new FakeStreamingChatModel(resolveModelName(modelName));
-    }
-
-    private String resolveModelName(String modelName) {
-        return (modelName == null || modelName.isEmpty()) ? getDefaultModelName() : modelName;
+    public StreamingChatModel createStreamingChatModelInstance(LlmModelConf params) {
+        return new FakeStreamingChatModel(params.getModelName());
     }
 }
 ```
 
+The `LlmModelConf` parameter provides access to all configuration fields:
+
+- `params.getModelName()` — The actual model identifier (e.g., `fake-gpt-v1`).
+- `params.getApiSecret()` — The API key (decrypted automatically).
+- `params.getEndpointUrl()` — The provider API base URL.
+- `params.getTemperature()`, `params.getMaxTokens()`, `params.getTimeout()`, etc. — Generation parameters.
+
+These values are the result of merging the provider's global configuration with model-specific overrides. See [Parameter Precedence](../understanding/concepts.md#parameter-precedence).
+
 ---
 
-## Step 5: Packaging & Deployment
+## Step 5: Register Provider Configuration
+
+After deploying the provider bean, you must create a **provider configuration** (`LlmProviderConf`) to define which models are available and their parameters. This can be done in three ways:
+
+1. **YAML Bootstrapping** — Add a `llm.provider.globals` entry in `llm-clients-config.yml`. It will be loaded into OpenSearch at startup. See [Configuration Files](../reference/config_files.md#dynamic-provider-configuration).
+
+2. **Admin API** — Create a configuration via `POST /api/v1/admin/llm/provider-conf`. See [REST API Reference](../reference/api.md#administration--llm-providers).
+
+3. **Admin UI** — Use the [LLM Provider Management](../admin/llm_providers.md) page to visually configure the provider and test connectivity.
+
+---
+
+## Step 6: Packaging & Deployment
 
 ### Packaging (Fat JAR)
 
@@ -234,7 +238,7 @@ Add the JAR to the `/app/provider/` directory in your Docker image.
 
 ```dockerfile
 # Start from the specific version of Uxopian-ai
-FROM artifactory.arondor.cloud:5001/uxopian-ai:2026.0.0-ft1-rc2-full
+FROM artifactory.arondor.cloud:5001/uxopian-ai:2026.0.0-ft2-full
 
 # Copy your custom provider Fat JAR into the provider directory
 COPY ./target/custom-fakellm-provider-1.0.jar /app/provider/
@@ -242,7 +246,7 @@ COPY ./target/custom-fakellm-provider-1.0.jar /app/provider/
 
 ---
 
-## Step 6: Verification & Testing
+## Step 7: Verification & Testing
 
 Once your provider is deployed and the application has restarted, you can verify it by sending a standard HTTP request using `cURL`.
 

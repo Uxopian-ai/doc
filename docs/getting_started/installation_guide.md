@@ -14,7 +14,10 @@ The Starter Kit provides a ready-to-use stack containing the AI service and an O
 
 ### 🔹 Step 1: Download and Structure
 
-Download the [uxopian-ai_docker_example.zip](./uxopian-ai_docker_example.zip) archive. Once extracted, you should have the following directory structure:
+!!! tip "Download"
+    **[:material-download: uxopian-ai_docker_example.zip](./uxopian-ai_docker_example.zip)**
+
+Once extracted, you should have the following directory structure:
 
 ```text
 .
@@ -22,7 +25,9 @@ Download the [uxopian-ai_docker_example.zip](./uxopian-ai_docker_example.zip) ar
 │   ├── application.yml             # Main Spring configuration
 │   ├── goals.yml                   # AI Goals definition
 │   ├── llm-clients-config.yml      # API Keys and Model selection (OpenAI, Mistral, etc.)
+│   ├── llm-clients-config.yml.example  # Example with all providers
 │   ├── mcp-server.yml              # Model Context Protocol config
+│   ├── metrics.yml                 # Micrometer & Actuator config
 │   ├── opensearch.yml              # Vector database connection
 │   └── prompts.yml                 # Pre-defined prompts
 ├── gateway-application.yaml        # Gateway config (if used)
@@ -32,14 +37,15 @@ Download the [uxopian-ai_docker_example.zip](./uxopian-ai_docker_example.zip) ar
 
 ### 🔹 Step 2: Pull Images
 
-Pull the required images (example via Cloudsmith or Artifactory):
+Pull the required images from the registry configured in your `uxopian-ai-stack.yml`:
 
 ```bash
-docker pull docker.uxopian.com/preview/uxopian-ai:2026.0.0-ft1-rc3
-docker pull docker.uxopian.com/preview/gateway:2026.0.0-ft1-rc3
+docker pull artifactory.arondor.cloud:5001/uxopian-ai:2026.0.0-ft1-rc3
 # Note: The OpenSearch image is public and will be pulled automatically by the compose file.
-
 ```
+
+!!! note "Registry"
+    The compose file uses `artifactory.arondor.cloud:5001/` by default. If your organization hosts images on a different registry (e.g., `docker.uxopian.com/preview/`), update the `image:` fields in `uxopian-ai-stack.yml` accordingly.
 
 ### 🔹 Step 3: Environment Variable Configuration
 
@@ -66,6 +72,11 @@ The user interface (running in the user's browser) must contact the AI service.
 | `APP_BASE_URL`           | Public URL of the AI application (for callbacks).       | `http://localhost:8085` |
 | `SPRING_PROFILES_ACTIVE` | Configuration profile (`dev` disables strict security). | `dev`                   |
 
+!!! info "About the `dev` Profile and the BFF Gateway"
+    The starter kit ships with `SPRING_PROFILES_ACTIVE=dev` and **no Gateway service**. This means you can call the AI service directly — missing `X-User-*` headers are filled in with defaults (`User-development` / `Tenant-development`).
+
+    In a **production** deployment, you should remove the `dev` profile and deploy the [Uxopian Gateway (BFF)](../understanding/security.md) in front of the AI service. The Gateway authenticates users, extracts their identity from JWT/OAuth2/LDAP tokens, and injects the `X-User-TenantId`, `X-User-Id`, `X-User-Roles`, and `X-User-Token` headers. The Gateway service is also included in this compose file (commented out) — uncomment the `uxopian-ai-gateway` block, configure its `provider`, and remove the `dev` profile to switch to a secured setup.
+
 ### 🔹 Step 4: Start
 
 ```bash
@@ -86,8 +97,12 @@ Use this method for deployment on a standard server (VM Linux/Windows) without D
 
 ### 🔹 Step 1: Installation
 
-1. Download the complete package: `ai-standalone-2026.0.0-ft1-rc3-complete-package.zip`.
-2. Unzip the archive:
+!!! tip "Download"
+    **:material-download: ai-standalone-2026.0.0-ft1-rc3-complete-package.zip**
+
+    _Contact your Uxopian representative for access to this package._
+
+Unzip the archive:
 
 ```bash
 unzip ai-standalone-2026.0.0-ft1-rc3-complete-package.zip
@@ -103,7 +118,7 @@ All files are located in the `config/` folder. You **must** edit them:
 - **`llm-clients-config.yml`**: Configure your LLM providers (Azure OpenAI, Mistral, etc.) and API keys.
 - **`application.yml`**: General settings (ports, logs).
 
-Documentation is available at: [Configuration](../../configuration/config_files/)
+Documentation is available at: [Configuration](../reference/config_files.md)
 
 ### 🔹 Step 3: Execution
 
@@ -121,22 +136,8 @@ java -jar ai-standalone.jar
 
 ---
 
-## 🔹 Step 4: Prompt Creation (Backend)
+## 🔹 Step 4: Create Your First Prompt
 
-Once the backend is running, you must define what the AI should do by creating a prompt via the API.
+Once the backend is running, you need to define what the AI should do by creating prompts via the API.
 
-- **URL:** `POST /api/v1/admin/prompts`
-- **Body:**
-
-```json
-{
-  "id": "summarizeDocMd",
-  "role": "user",
-  "content": "Summarize the following document: \n [[${documentService.extractTextualContent(documentId)}]]",
-  "defaultLlmProvider": "openai",
-  "defaultLlmModel": "gpt-4o",
-  "temperature": "0.7"
-}
-```
-
-_Note: `[[...]]` is a server-side instruction to inject the document text._
+See the [Managing Prompts and Goals](../how_to/managing_prompts_goals.md) guide for detailed instructions and examples.

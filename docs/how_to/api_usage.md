@@ -1,41 +1,30 @@
-# 📘 User Guide: Integration & Common Operations
+# Using the REST API
 
-This guide provides practical examples for the most common tasks in **uxopian-ai**: managing conversations, orchestrating goals, and sending requests.
+This guide provides practical examples for the most common tasks in **uxopian-ai**: managing conversations, sending requests, orchestrating goals, and accessing admin endpoints.
 
-> **⚠️ Architecture Note:** > **uxopian-ai** is a backend microservice designed to run behind a **BFF (Backend for Frontend)** or **API Gateway**. It should **never** be exposed directly to the public internet.
->
-> The examples below assume you are either:
->
-> 1.  Developing a Gateway that forwards requests to `uxopian-ai`.
-> 2.  Testing locally in a secure environment (e.g., via VPN or local network).
+For details on the security model and authentication headers, see [Security Model (BFF Pattern)](../understanding/security.md).
 
 ---
 
-## 🔑 Prerequisites: Authentication & Context
+## Prerequisites: Authentication Headers
 
-**uxopian-ai** does not handle user login directly. Instead, it relies on your Gateway to authenticate the user and **inject identity headers** into the request before it reaches the service.
+Uxopian-ai never handles authentication itself — it relies on a **BFF Gateway** to validate credentials and inject identity headers into every request. See [Security Model (BFF Pattern)](../understanding/security.md) for the full architecture.
 
-### 1\. Production Mode (Gateway Injection)
-
-When deploying in production, your Gateway must pass the following headers:
-
-| Header Name       | Description                                             | Required |
+| Header            | Description                                             | Required |
 | :---------------- | :------------------------------------------------------ | :------- |
 | `X-User-TenantId` | Isolates data per tenant (organization).                | **Yes**  |
 | `X-User-Id`       | Unique identifier for the user.                         | **Yes**  |
 | `X-User-Roles`    | Comma-separated list of roles (e.g., `admin,user`).     | No       |
-| `X-User-Token`    | Original user token (if needed for downstream context). | No       |
+| `X-User-Token`    | Original user token, forwarded to integrations (FlowerDocs, ARender). | No       |
 
-### 2\. Development Mode
+The Gateway authenticates the user (OAuth2, JWT, LDAP...), extracts identity from the session, and enriches the request with these `X-User-*` headers before forwarding it to uxopian-ai. The AI service trusts these headers implicitly — which is why uxopian-ai must **never** be exposed directly to the network.
 
-If the application is started with the `dev` profile (`spring.profiles.active=dev`), `uxopian-ai` will inject default credentials if headers are missing:
-
-- **Default Tenant:** `Tenant-development`
-- **Default User:** `User-development`
+!!! tip "Development Mode"
+    In development mode (`SPRING_PROFILES_ACTIVE=dev`), the AI service accepts requests without headers and fills in defaults (`User-development` / `Tenant-development`). The examples below include explicit headers so they work in both dev and production environments. See [Development Mode](../understanding/security.md#development-mode) for details.
 
 ---
 
-## 💬 1. Creating a Conversation
+## 1. Creating a Conversation
 
 Conversations are the container for all history and context. They are scoped to the specific `X-User-TenantId` provided in the headers.
 
@@ -63,7 +52,6 @@ const createConversation = async (tenantId, userId) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // The Gateway injects these headers
         "X-User-TenantId": tenantId,
         "X-User-Id": userId,
       },
@@ -78,7 +66,7 @@ const createConversation = async (tenantId, userId) => {
 
 ---
 
-## 📨 2. Sending a Text Request (Non-Streaming)
+## 2. Sending a Text Request (Non-Streaming)
 
 Send a prompt to the LLM within a conversation. The `X-User-TenantId` ensures the user only accesses conversations they belong to.
 
@@ -111,7 +99,7 @@ curl -X POST "http://localhost:8080/api/v1/requests?conversation=123e4567-e89b-1
 
 ---
 
-## 🎯 3. Triggering a Goal (Orchestration)
+## 3. Triggering a Goal (Orchestration)
 
 Use the `goal` type to let **uxopian-ai** select the correct prompt based on the payload context.
 
@@ -148,7 +136,7 @@ curl -X POST "http://localhost:8080/api/v1/requests?conversation=123e4567-e89b-1
 
 ---
 
-## 🌊 4. Sending a Streaming Request
+## 4. Sending a Streaming Request
 
 For real-time responses (typing effect), use the streaming endpoint.
 
@@ -177,11 +165,9 @@ curl -X POST "http://localhost:8080/api/v1/requests/stream?conversation=123e4567
 
 ---
 
-## 👮 5. Administrative Operations
+## 5. Administrative Operations
 
 To access Admin endpoints, the Gateway must inject the `admin` role in the `X-User-Roles` header.
-
-- **Endpoint:** `GET /api/v1/admin/stats/global`
 
 ### Example: Fetching Global Statistics
 
@@ -193,3 +179,53 @@ curl -X GET "http://localhost:8080/api/v1/admin/stats/global" \
   -H "X-User-Id: admin-user" \
   -H "X-User-Roles: admin"
 ```
+
+### Example: Listing LLM Provider Configurations
+
+**cURL**
+
+```bash
+curl -X GET "http://localhost:8080/api/v1/admin/llm/provider-conf" \
+  -H "X-User-TenantId: enterprise-corp-a" \
+  -H "X-User-Id: admin-user" \
+  -H "X-User-Roles: admin"
+```
+
+### Example: Creating an LLM Provider Configuration
+
+**cURL**
+
+```bash
+curl -X POST "http://localhost:8080/api/v1/admin/llm/provider-conf" \
+  -H "Content-Type: application/json" \
+  -H "X-User-TenantId: enterprise-corp-a" \
+  -H "X-User-Id: admin-user" \
+  -H "X-User-Roles: admin" \
+  -d '{
+    "provider": "openai",
+    "defaultLlmModelConfName": "gpt5",
+    "globalConf": {
+      "apiSecret": "sk-your-api-key",
+      "temperature": 0.7,
+      "maxRetries": 3,
+      "timeout": "60s"
+    },
+    "llModelConfs": [
+      {
+        "llmModelConfName": "gpt5",
+        "modelName": "gpt-5.1",
+        "multiModalSupported": true,
+        "functionCallSupported": true
+      },
+      {
+        "llmModelConfName": "gpt5-mini",
+        "modelName": "gpt-5-mini",
+        "temperature": 0.3,
+        "multiModalSupported": true,
+        "functionCallSupported": true
+      }
+    ]
+  }'
+```
+
+For the complete list of LLM provider management endpoints, see [REST API Reference — LLM Providers](../reference/api.md#administration--llm-providers).

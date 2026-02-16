@@ -29,7 +29,7 @@ We will create a prompt with the ID `summarizeDocumentMarkdown`.
   "role": "user",
   "content": "Summarize the following document in a plain text format: \n [[${documentService.extractTextualContent(documentId)}]]",
   "defaultLlmProvider": "openai",
-  "defaultLlmModel": "gpt-4o",
+  "defaultLlmModel": "gpt-5.1",
   "temperature": "0.7",
   "timeSaved": 300,
   "requiresMultiModalModel": false,
@@ -38,7 +38,7 @@ We will create a prompt with the ID `summarizeDocumentMarkdown`.
 ```
 
 !!! note "Variables"
-Notice the usage of `[[${documentId}]]` in the content. This variable will be dynamically replaced by the JavaScript script in the next step.
+Notice the usage of `[[${documentId}]]` in the content. This variable is resolved server-side by the Thymeleaf engine using the `documentId` value passed in the request payload (see Step 2).
 
 ---
 

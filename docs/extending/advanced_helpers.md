@@ -32,12 +32,12 @@ curl -X POST "http://localhost:8080/api/v1/admin/prompts" \
     "role": "system",
     "content": "Role: Expert Analyst.\nGoal: Extract key facts efficiently.\nInstructions:\n1. Extract critical points as bullet list.\n2. Merge duplicates.\n3. Output only the content.\n\nInput Data:\n[[${content}]]",
     "defaultLlmProvider": "openai",
-    "defaultLlmModel": "gpt-4o-mini",
+    "defaultLlmModel": "gpt-5.1",
     "timeSaved": 5
   }'
 ```
 
-> **Recommendation:** Use a fast model for intermediate steps (e.g., `gpt-4o-mini`).
+> **Recommendation:** Use a fast, cheap model for the map phase (e.g., `gpt-5-mini` or `gpt-4.1-nano`). These intermediate steps process many chunks in parallel — using a flagship model here would multiply costs with little quality benefit. Reserve the powerful model for the final reduce/synthesis step (Step 3). See [Choosing the Right Model](../understanding/concepts.md#choosing-the-right-model) for the full model tier guide.
 
 ---
 
@@ -104,7 +104,7 @@ curl -X POST "http://localhost:8080/api/v1/admin/prompts" \
     "role": "user",
     "content": "Please summarize the document in 500 words:\n\n[[${advancedMapReduceHelper.processDocument(documentId)}]]",
     "defaultLlmProvider": "openai",
-    "defaultLlmModel": "gpt-4o",
+    "defaultLlmModel": "gpt-5.1",
     "timeSaved": 60
   }'
 ```

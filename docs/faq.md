@@ -10,7 +10,7 @@ The main condition is integration: a system integrator or partner must implement
 
 Uxopian AI sends requests to LLMs through a prompt templating system. Prompts can include expressions that are evaluated at runtime to fetch context from the surrounding application or content system.
 
-Documentation: [https://docs.ai.uxopian.com/how_to_guides/extensions/create_custom_helpers/?h=prompt+help](https://docs.ai.uxopian.com/how_to_guides/extensions/create_custom_helpers/?h=prompt+help)
+Documentation: [Creating Custom Helpers](extending/custom_helpers.md)
 
 Example (as used in standard demos), where Uxopian AI summarizes the document currently opened by the user:
 
@@ -35,7 +35,7 @@ That means you can implement a new prompt helper for another system. For example
 * An OpenText helper that retrieves full text and metadata from OpenText
 * A “case context” helper for Salesforce that injects the current case details (customer, policy, claim status, next actions, etc.)
 
-How to create custom prompt helpers: [https://docs.ai.uxopian.com/how_to_guides/extensions/create_custom_helpers/?h=prompt](https://docs.ai.uxopian.com/how_to_guides/extensions/create_custom_helpers/?h=prompt)
+How to create custom prompt helpers: [Creating Custom Helpers](extending/custom_helpers.md)
 
 Uxopian AI also includes existing helpers (for example, a helper for FlowerDocs to access documents by FlowerDocs ID), which can be used as a reference.
 
@@ -43,7 +43,7 @@ Uxopian AI also includes existing helpers (for example, a helper for FlowerDocs 
 
 On the UI side, the assistant is packaged as a **web component**, which is a highly portable format for embedding UI elements in web applications. This makes it straightforward to integrate Uxopian AI into any web app that provides an extension mechanism (plugin areas, custom widgets, embedded panels, etc.).
 
-Documentation: [https://docs.ai.uxopian.com/how_to_guides/integrations/integrate_web_page/](https://docs.ai.uxopian.com/how_to_guides/integrations/integrate_web_page/)
+Documentation: [Embedding in a Web Page](how_to/integrate_web_page.md)
 
 ### Summary
 
@@ -61,7 +61,7 @@ If your “agent” exposes a messaging / chat API (and runs its own reasoning l
 
 **2) Action agents (agents that execute tasks).**  
 If your “agent” is something you call to perform an action (redaction, metadata updates, lookups, update customer in CRM,  etc.) rather than a chat endpoint, then the right concept is a **Tool / Function Calling** integration. Uxopian AI can invoke declared tools behind the scenes when the user asks for actions (e.g., “Redact these documents and remove addresses”).  
-See: https://docs.ai.uxopian.com/how_to_guides/extensions/create_custom_tools/  
+See: [Creating Custom Tools](extending/custom_tools.md)  
 We also plan to add a direct MCP bridge later this year.
 
 ## Can I connect customer-developed LLM endpoints (or proprietary AI services) in Xopia?
@@ -71,8 +71,4 @@ Yes. Customer-developed LLM endpoints (or proprietary AI services) can be integr
 ## Do we have an internal paper about “agents” in Uxopian AI?
 
 Not at the moment as a single dedicated paper. The most authoritative references today are the extension documentation (custom tools, and provider/model extensions). We will integrate the concept of agent later in 2026 in Uxopian AI framework.
-
-
-
-
 

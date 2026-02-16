@@ -23,7 +23,7 @@ First, configure the prompt in the backend. This prompt will define how the AI b
   "role": "system",
   "content": "You are a helpful assistant for the website. The user is currently viewing the page: '[[${pageTitle}]]'. Answer their questions concisely.",
   "defaultLlmProvider": "openai",
-  "defaultLlmModel": "gpt-4o",
+  "defaultLlmModel": "gpt-5.1",
   "temperature": "0.7",
   "timeSaved": 60,
   "requiresMultiModalModel": false,
@@ -95,11 +95,11 @@ document.addEventListener("DOMContentLoaded", () => {
           request: {
             inputs: [
               {
-                role: "system",
+                role: "user",
                 content: [
                   {
-                    type: "prompt",
-                    promptId: "webAssistantPrompt", // Must match Backend ID
+                    type: "PROMPT",
+                    value: "webAssistantPrompt", // Must match Backend ID
                     payload: {
                       // Dynamic variables to inject into the prompt
                       pageTitle: currentPageTitle,
@@ -133,7 +133,7 @@ This function allows you to open the chat modal programmatically.
 - **wsEndpoint:** The base URL for WebSocket connections (used for streaming responses).
 - **request:** The initial payload sent to the LLM to start the conversation.
   - **inputs:** An array of message objects.
-  - **promptId:** The ID of the prompt configuration on the server.
+  - **value:** The ID of the prompt configuration on the server.
   - **payload:** A key-value object. Keys must match the variables defined in your prompt (e.g., `[[${pageTitle}]]`).
 
 !!! tip "CORS Configuration"

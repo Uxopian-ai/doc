@@ -1,17 +1,19 @@
-# 🛠️ How to Contribute Prompts and Goals
+# Managing Prompts and Goals
 
-This guide explains how to manage Prompts and Goals and how to use advanced templating features to make them powerful and dynamic.
+This guide explains how to create, update, and manage Prompts and Goals using the REST API and the admin interface.
 
-For a visual guide on managing these resources via the UI, please refer to the [**Admin Interface Guide**](how_to_use_admin_interface#contribute_prompt).
+For a visual guide on managing these resources via the UI, refer to the [Admin Interface Guide](../admin/prompts.md).
+
+For a deep dive into the templating syntax used in prompt content, see [The Templating Engine](../understanding/templating.md).
 
 ---
 
-## 📡 Managing Prompts and Goals via the API
+## Managing Prompts and Goals via the API
 
 The recommended way to manage Prompts and Goals is to store them in OpenSearch using the REST API. This allows for dynamic updates without restarting the service.
 
-> **⚠️ Security Note:**
-> These are **Admin** operations. Your Gateway must inject the `X-User-Roles: admin` header for these requests to succeed.
+!!! warning "Security Note"
+    These are **Admin** operations. Your Gateway must inject the `X-User-Roles: admin` header for these requests to succeed.
 
 ### API Operations
 
@@ -33,7 +35,7 @@ Refer to the Swagger documentation for the complete schema details.
 
 ---
 
-## 📝 Example: Creating a New Prompt
+## Example: Creating a New Prompt
 
 Use this endpoint to store a prompt configuration, including its default LLM settings.
 
@@ -50,16 +52,19 @@ curl -X POST "http://localhost:8080/api/v1/admin/prompts" \
   "role": "user",
   "content": "Summarize the following document in a plain text format:\n\n[[${documentService.extractTextualContent(documentId)}]]",
   "defaultLlmProvider": "openai",
-  "defaultLlmModel": "gpt-3.5-turbo",
+  "defaultLlmModel": "gpt-5.1",
   "timeSaved": 60
 }'
 ```
 
 _Note: The `timeSaved` field (in seconds) is used to calculate ROI stats in the admin panel._
 
+!!! tip "Choosing the Right Model"
+    The `defaultLlmModel` you assign to a prompt has a direct impact on **response quality**, **speed**, and **cost**. Use a flagship model (`gpt-5.1`, `gpt-5`) for complex analysis, a balanced model (`gpt-4.1`, `gpt-4o`) for general use, or a fast model (`gpt-5-mini`, `gpt-4.1-nano`) for high-volume, simple tasks. See [Choosing the Right Model](../understanding/concepts.md#choosing-the-right-model) for a complete guide.
+
 ---
 
-## 🎯 Example: Creating a New Goal
+## Example: Creating a New Goal
 
 A Goal maps a specific context to a prompt ID.
 
@@ -74,29 +79,18 @@ curl -X POST "http://localhost:8080/api/v1/admin/goals" \
 -d '{
   "goalName": "compare",
   "promptId": "detailedComparison",
-  "filter": "[[${documentType == ''contract''}]]",
+  "filter": "[[${documentType == '\''contract'\''}]]",
   "index": 125
 }'
 ```
 
 ---
 
-## ⚡ Using Advanced Template Functions
-
-The templating engine is based on **Thymeleaf** and supports **Spring Expression Language (SpEL)**, giving you powerful capabilities within your prompts.
-
-- **Accessing the Request Payload**: Use `${payload.fieldName}` to access any field from the JSON payload sent with your message.
-- **Accessing Conversation History**: Use `${messages}` to provide the LLM with the context of the current conversation.
-- **Using Conditional Logic**: Use SpEL for conditional logic, e.g., `[[${payload.language != null} ? ${payload.language} : 'english']]`.
-- **Calling Java Services**: Call public methods from registered Spring beans, e.g., `[[${documentService.extractTextualContent(payload.documentId)}]]`.
-
----
-
-## 💡 Examples of Prompt and Goal Definitions
+## Examples of Prompt and Goal Definitions
 
 Here are practical examples of how to structure your Goal and Prompt logic.
 
-### 1\. Goal Logic (Orchestration)
+### 1. Goal Logic (Orchestration)
 
 Goals use the `index` property to determine priority (lower numbers are checked first) and a `filter` to match the context.
 
@@ -104,8 +98,6 @@ Goals use the `index` property to determine priority (lower numbers are checked 
 
 1.  Check if `documentType` is 'contract'. If yes, use `detailedComparison`.
 2.  Otherwise, fall back to `genericComparison`.
-
-<!-- end list -->
 
 ```json
 [
@@ -124,7 +116,7 @@ Goals use the `index` property to determine priority (lower numbers are checked 
 ]
 ```
 
-### 2\. Prompt: Conditional Logic
+### 2. Prompt: Conditional Logic
 
 This prompt uses a SpEL expression to dynamically set the target language.
 
@@ -134,7 +126,7 @@ Translate the following document in [[${language != null} ? ${language} : 'engli
 [[${documentService.extractTextualContent(documentId)}]]
 ```
 
-### 3\. Prompt: Iteration
+### 3. Prompt: Iteration
 
 This prompt iterates over a list of document IDs from the payload to compare multiple documents within a single request.
 
@@ -147,7 +139,7 @@ Document content [[${iterStat.count}]] : [[${documentService.extractTextualConte
 [/]
 ```
 
-### 4\. Prompt: Composition (Prompt-in-Prompt)
+### 4. Prompt: Composition (Prompt-in-Prompt)
 
 A prompt can call another prompt. Here, `summarizeDocumentMarkdown` reuses the formatting rules defined in a separate prompt named `markdownResponse`.
 
@@ -159,7 +151,7 @@ Document content:
 [[${documentService.extractTextualContent(documentId)}]]
 ```
 
-### 5\. Prompt: System Persona
+### 5. Prompt: System Persona
 
 A generic `basePrompt` can be used to define the persona and core instructions for the AI.
 
@@ -171,11 +163,11 @@ Providing clear and precise answers...
 
 ---
 
-## 🖥️ Web Interface for Prompt Management
+## Web Interface for Prompt Management
 
 In addition to the REST API, **uxopian-ai** includes a built-in web interface that lets you visually manage prompts.
 
-> 🔗 **Access**: `https://<your-uxopian-endpoint>/ai`
+> Access: `https://<your-uxopian-endpoint>/ai`
 
 Through this interface, you can:
 
@@ -184,4 +176,4 @@ Through this interface, you can:
 - Add new Prompts.
 - Delete or reorder items interactively.
 
-For a full walkthrough of the interface, see the [**Admin Interface Guide**](https://www.google.com/search?q=how_to_use_admin_interface%23contribute_prompt).
+For a full walkthrough of the interface, see the [Admin Interface Guide](../admin/prompts.md).

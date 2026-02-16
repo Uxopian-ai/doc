@@ -1,6 +1,6 @@
 # How-To: Integrate AI Features in ARender
 
-This guide details the process of adding context-aware AI buttons directly into the ARender High Content Interface (HCI). We will configure the necessary files to load the Uxopian-ai web components and add a "Summarize Document" button to the top panel.
+This guide details the process of adding context-aware AI buttons directly into the ARender High Content Interface (HCI). We will configure the necessary files to load the Uxopian-ai web components and add AI action buttons to the top panel.
 
 ## Prerequisites
 
@@ -10,35 +10,38 @@ This guide details the process of adding context-aware AI buttons directly into 
 
 ## File Structure Reference
 
-Ensure your custom ARender configuration follows this structure:
+The ARender configuration files should follow this structure:
 
 ```text
-├── configurations
+├── configurations/
 │   ├── arender-custom-client.properties  # Main configuration entry point
 │   ├── arender-plugins.xml               # Plugin loader
 │   └── toppanel-arender-ai-configuration.xml # Button definitions (Beans)
-└── public
+└── public/
     ├── web-components.css
     └── web-components.js
 ```
 
+!!! note "Starter Kit"
+    The [Docker + ARender starter kit](../getting_started/installation_guide_arender.md) already includes these configuration files under `arender/configurations/`. You can use them as a starting point.
+
 ---
 
-## Step 1: Create the Prompt
+## Step 1: Create the Prompts
 
-First, we create the prompt in the Uxopian-ai backend. This prompt utilizes a server-side service to extract text content dynamically from the document currently viewed in ARender.
+The starter kit's `config/prompts.yml` already includes pre-defined prompts (e.g., `summarizeDocumentText`, `summarizeDocumentMarkdown`, `translate`, `detailedComparison`). If you need a custom prompt, create it via the API.
 
 **Endpoint:** `POST /api/v1/admin/prompts`
 
-**Request Body:**
+**Request Body (example):**
 
 ```json
 {
-  "id": "summarizeDocMd",
+  "id": "summarizeDocumentText",
   "role": "user",
-  "content": "Summarize the following document in a plain text format: \n [[${documentService.extractTextualContent(documentId)}]]",
+  "content": "Summarize the following document in a plain text format:\n\n[[${documentService.extractTextualContent(documentId)}]]",
   "defaultLlmProvider": "openai",
-  "defaultLlmModel": "gpt-4o",
+  "defaultLlmModel": "gpt-5.1",
   "temperature": "0.7",
   "timeSaved": 300,
   "requiresMultiModalModel": false,
@@ -47,7 +50,7 @@ First, we create the prompt in the Uxopian-ai backend. This prompt utilizes a se
 ```
 
 !!! note "Context Injection"
-The expression `[[${documentService.extractTextualContent(documentId)}]]` indicates that the text extraction happens on the server side (Uxopian backend) using the `documentId` passed in the payload.
+    The expression `[[${documentService.extractTextualContent(documentId)}]]` indicates that the text extraction happens on the server side (Uxopian backend) using the `documentId` passed in the payload.
 
 ---
 
@@ -66,11 +69,15 @@ arenderjs.startupScript=web-components.js
 topPanel.section.middle.buttons.beanNames=addStickyNoteAnnotationButton,annotationCreationOpenCreation,documentBuilderButton,aiMenu
 
 # 4. Configure the connection to Uxopian-ai
-uxopian.ai.host=[https://iris.demos.uxopian.com/ai](https://iris.demos.uxopian.com/ai)
+# Uses UXOPIAN_AI_HOST env var with a fallback default
+uxopian.ai.host=${UXOPIAN_AI_HOST:http://localhost:8085}
 
 # 5. Optional: Disable info toaster if preferred
 toaster.log.info.enabled=false
 ```
+
+!!! warning "UXOPIAN_AI_HOST"
+    This must be the **public URL** reachable from the user's browser, not the internal Docker network address. Set it via the `UXOPIAN_AI_HOST` environment variable in your ARender UI container (see the [Docker + ARender installation guide](../getting_started/installation_guide_arender.md)).
 
 ---
 
@@ -81,14 +88,13 @@ Ensure ARender loads your custom bean configuration by importing it in `configur
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans default-lazy-init="true" default-autowire="no"
-    xmlns="[http://www.springframework.org/schema/beans](http://www.springframework.org/schema/beans)"
-    xmlns:xsi="[http://www.w3.org/2001/XMLSchema-instance](http://www.w3.org/2001/XMLSchema-instance)"
-    xsi:schemaLocation="[http://www.springframework.org/schema/beans](http://www.springframework.org/schema/beans)
-        [http://www.springframework.org/schema/beans/spring-beans.xsd](http://www.springframework.org/schema/beans/spring-beans.xsd)">
+    xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <import resource="plume.xml"/>
     <import resource="html-plugin.xml"/>
-
     <import resource="toppanel-arender-ai-configuration.xml"/>
 
 </beans>
@@ -96,19 +102,19 @@ Ensure ARender loads your custom bean configuration by importing it in `configur
 
 ---
 
-## Step 4: Define the AI Button
+## Step 4: Define the AI Buttons
 
-We define the menu and the specific button for our prompt in `configurations/toppanel-arender-ai-configuration.xml`.
+Define the menu and buttons in `configurations/toppanel-arender-ai-configuration.xml`. The JavaScript handler invokes the `createChat` function exposed by the web component.
 
-This XML configures the **AI Menu** container and the **Summarize** button. The JavaScript handler inside the bean invokes the `createChat` function exposed by the web component, passing the current document ID in the payload.
+Below is a simplified example with a single "Summarize" button. The starter kit includes a more complete version with summarize, compare, translate, and open chat buttons.
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans default-lazy-init="true" default-autowire="no"
-    xmlns="[http://www.springframework.org/schema/beans](http://www.springframework.org/schema/beans)"
-    xmlns:xsi="[http://www.w3.org/2001/XMLSchema-instance](http://www.w3.org/2001/XMLSchema-instance)"
-    xsi:schemaLocation="[http://www.springframework.org/schema/beans](http://www.springframework.org/schema/beans)
-        [http://www.springframework.org/schema/beans/spring-beans.xsd](http://www.springframework.org/schema/beans/spring-beans.xsd)">
+    xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean id="aiMenu"
        class="com.arondor.viewer.client.toppanel.presenter.SubMenuButtonPresenter">
@@ -119,13 +125,13 @@ This XML configures the **AI Menu** container and the **Summarize** button. The 
        <property name="visibilityForTopPanel">
           <ref bean="topPanelVisibilityMode" />
        </property>
-       <property name="orderedNamedList" value="summarizeDocMdButton" />
+       <property name="orderedNamedList" value="summarizeTxtButton" />
     </bean>
 
-    <bean id="summarizeDocMdButton"
+    <bean id="summarizeTxtButton"
        class="com.arondor.viewer.client.toppanel.presenter.DropdownMenuItemPresenter">
-       <constructor-arg value="summarizeDocMdButton"/>
-       <constructor-arg value="Summarize Document"/>
+       <constructor-arg value="summarizeTxtButton"/>
+       <constructor-arg value="Summarize in text format"/>
        <constructor-arg value="standardButton fas fa-list toppanelButton"/>
        <property name="enabled" value="true" />
        <property name="closingOnClick" value="true" />
@@ -134,7 +140,6 @@ This XML configures the **AI Menu** container and the **Summarize** button. The 
              <property name="jsCode">
                 <value>
 try {
-    // Invoke the Web Component's createChat function
     $wnd.createChat({
         endpoint: "${uxopian.ai.host}",
         wsEndpoint: "${uxopian.ai.host}",
@@ -143,9 +148,8 @@ try {
                 role: 'user',
                 content: [{
                     type: 'PROMPT',
-                    value: 'summarizeDocMd',
+                    value: 'summarizeDocumentText',
                     payload: {
-                        // Pass the current document ID to the backend
                         documentId: $wnd.getARenderJS().getCurrentDocumentId()
                     }
                 }]
@@ -153,16 +157,17 @@ try {
         }
     });
 } catch(e) {
-  console.log('Error launching AI Chat: ' + e);
+  console.log('Error : ' + e);
 }
                 </value>
              </property>
           </bean>
        </property>
     </bean>
-
 </beans>
 ```
+
+The `value` field in the JavaScript must match a prompt ID defined in the backend (here, `summarizeDocumentText` from `config/prompts.yml`).
 
 ---
 
@@ -170,40 +175,31 @@ try {
 
 To deploy these changes, you must build a custom Docker image that extends the official ARender base image. This ensures your configuration files and web resources are correctly placed in the container's runtime environment.
 
+!!! tip "Starter Kit Alternative"
+    The starter kit's `uxopian-ai-stack.yml` already mounts `arender/configurations/` as a volume into the ARender UI container, so you can iterate without rebuilding the image during development.
+
 ### Dockerfile Configuration
 
-Create a `Dockerfile` at the root of your project. The following example uses a multi-stage build to keep the final image clean.
+For production, create a `Dockerfile` at the root of your project:
 
 ```dockerfile
-# -----------------------------------------------------------------------------
-# Stage 1: Preparation (Builder)
-# Assumes your source code is available in the build context
-# -----------------------------------------------------------------------------
+# Stage 1: Preparation
 FROM alpine as builder
 WORKDIR /app
-
-# Copy local source folders to the builder stage
 COPY configurations/ configurations/
 COPY public/ public/
 
-# -----------------------------------------------------------------------------
 # Stage 2: Final Image
-# Extends the official ARender SpringBoot image
-# -----------------------------------------------------------------------------
-FROM artifactory.arondor.cloud:5001/arender-ui-springboot:2023.11.0
+FROM artifactory.arondor.cloud:5001/arender-ui-springboot:2023.16.0
 
-# 1. Install Custom Configurations
-# Overrides arender-custom-client.properties and adds the XML spring beans
+# Install configurations
 COPY --from=builder /app/configurations/* /home/arender/configurations/
 
-# 2. Install Web Resources
-# Places the Web Component JS and CSS in the public web folder
+# Install Web Resources
 COPY --from=builder /app/public/* /home/arender/public/
 ```
 
 ### Build Command
-
-Build the image using your standard Docker CLI:
 
 ```bash
 docker build -t my-custom-arender:1.0 .

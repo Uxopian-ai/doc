@@ -43,7 +43,7 @@ Add the following to your `pom.xml`:
     <artifactId>my-custom-tool</artifactId>
 
     <properties>
-        <langchain4j.version>1.9.1</langchain4j.version>
+        <langchain4j.version>1.11.0</langchain4j.version>
     </properties>
 
     <dependencies>
@@ -82,6 +82,8 @@ import dev.langchain4j.agent.tool.Tool;
 @ToolService // Marks this as a Tool for Uxopian-ai scanning
 public class BookingTool {
 
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(BookingTool.class);
+
     /**
      * The description inside @Tool is what the LLM sees.
      * Be descriptive about what the method does and what the parameters represent.
@@ -89,8 +91,6 @@ public class BookingTool {
     @Tool("Checks the availability of a meeting room for a specific date")
     public boolean checkAvailability(String roomName, String date) {
         // Logic to check database or external API
-        private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(BookingTool.class);
-
         logger.info("Checking availability for {} on {}", roomName, date);
         return true;
     }
@@ -167,7 +167,7 @@ Add your compiled JAR to the `tools/` directory in your custom Docker image.
 
 ```dockerfile
 # Start from the specific version of Uxopian-ai
-FROM artifactory.arondor.cloud:5001/uxopian-ai:2026.0.0-ft1-rc2-full
+FROM artifactory.arondor.cloud:5001/uxopian-ai:v2026.0.0-ft1-rc2-full
 
 # Copy your custom Tool Fat JAR into the tools directory
 COPY ./target/my-custom-tool-1.0-SNAPSHOT.jar /app/tools/

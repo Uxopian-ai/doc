@@ -1,6 +1,6 @@
 # Adding a Custom Gateway Authentication Provider
 
-The **Uxopian-ai Gateway (BFF)** acts as the security entry point for the platform. It is responsible for authenticating incoming requests and establishing a security context (Tenant ID, User ID, Roles) before forwarding traffic to the core AI service.
+The **Uxopian Gateway (BFF)** is a standalone service, deployed independently from the AI service, that acts as the security entry point for the platform. It is responsible for authenticating incoming requests and establishing a security context (Tenant ID, User ID, Roles) before forwarding traffic to the core AI service.
 
 To integrate with your organization's specific authentication mechanism (e.g., OAuth2 introspection, LDAP, Custom Headers, or JWT validation), you must implement a custom **Auth Provider**.
 
@@ -206,7 +206,7 @@ You must use the **Gateway Service** base image (different from the core AI imag
 
 ```dockerfile
 # Start from the Gateway Service image
-FROM artifactory.arondor.cloud:5001/uxopian-ai/gateway-service:2026.0.0-ft1-rc2-full
+FROM artifactory.arondor.cloud:5001/uxopian-ai/gateway-service:2026.0.0-ft2-full
 
 # Copy your custom Auth Provider Fat JAR into the provider directory
 COPY ./target/my-custom-auth-provider-1.0-SNAPSHOT.jar /app/provider/
