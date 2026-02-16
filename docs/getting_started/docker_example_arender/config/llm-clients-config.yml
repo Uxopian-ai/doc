@@ -9,57 +9,61 @@ llm:
   context: ${LLM_CONTEXT_SIZE:10}
   debug:
     enabled: ${LLM_DEBUG:false}
-# Settings specific to the OpenAI provider
-openai:
-  # API key pulled from environment variables (required)
-  api-key: ${OPENAI_API_KEY:}
 
-  # Default model for OpenAI if not specified elsewhere
-  model-name: gpt-5.1
+  # Dynamic LLM provider configurations
+  # Loaded into OpenSearch at startup, then manageable via Admin API/UI
+  provider:
+    globals:
+      - provider: openai
+        defaultLlmModelConfName: gpt5
+        globalConf:
+          apiSecret: ${OPENAI_API_KEY:}
+          temperature: 1
+          timeout: 60s
+          maxRetries: 3
+        llModelConfs:
+          - llmModelConfName: gpt5
+            modelName: gpt-5.1
+            multiModalSupported: true
+            functionCallSupported: true
+          - llmModelConfName: gpt5-std
+            modelName: gpt-5
+            multiModalSupported: true
+            functionCallSupported: true
+          - llmModelConfName: gpt5-mini
+            modelName: gpt-5-mini
+            multiModalSupported: true
+            functionCallSupported: true
+          - llmModelConfName: gpt5-nano
+            modelName: gpt-5-nano
+            multiModalSupported: true
+            functionCallSupported: true
+          - llmModelConfName: gpt41
+            modelName: gpt-4.1
+            multiModalSupported: true
+            functionCallSupported: true
+          - llmModelConfName: gpt41-mini
+            modelName: gpt-4.1-mini
+            multiModalSupported: true
+            functionCallSupported: true
+          - llmModelConfName: gpt41-nano
+            modelName: gpt-4.1-nano
+            multiModalSupported: true
+            functionCallSupported: true
+          - llmModelConfName: gpt4o
+            modelName: gpt-4o
+            multiModalSupported: true
+            functionCallSupported: true
+          - llmModelConfName: gpt4o-mini
+            modelName: gpt-4o-mini
+            multiModalSupported: true
+            functionCallSupported: true
+          - llmModelConfName: o3-mini
+            modelName: o3-mini
+            multiModalSupported: false
+            functionCallSupported: true
+          - llmModelConfName: o4-mini
+            modelName: o4-mini
+            multiModalSupported: false
+            functionCallSupported: true
 
-  # Generation parameters
-  temperature: 1
-  timeout: 60s
-  max-retries: 3
-
-  # List of available models and their features
-  supported-models:
-    - modelName: gpt-5.1
-      multi-modal-supported: true
-      function-call-supported: true
-    - modelName: gpt-5
-      multi-modal-supported: true
-      function-call-supported: true
-    - modelName: gpt-5-mini
-      multi-modal-supported: true
-      function-call-supported: true
-    - modelName: gpt-5-nano
-      multi-modal-supported: true
-      function-call-supported: true
-    - modelName: gpt-4.1
-      multi-modal-supported: true
-      function-call-supported: true
-    - modelName: gpt-4.1-mini
-      multi-modal-supported: true
-      function-call-supported: true
-    - modelName: gpt-4.1-nano
-      multi-modal-supported: true
-      function-call-supported: true
-    - modelName: gpt-4o
-      multi-modal-supported: true
-      function-call-supported: true
-    - modelName: gpt-4o-mini
-      multi-modal-supported: true
-      function-call-supported: true
-    - modelName: gpt-4-turbo
-      multi-modal-supported: true
-      function-call-supported: true
-    - modelName: o3-mini
-      multi-modal-supported: false
-      function-call-supported: true
-    - modelName: o4-mini
-      multi-modal-supported: false
-      function-call-supported: true
-    - modelName: gpt-3.5-turbo
-      multi-modal-supported: false
-      function-call-supported: true

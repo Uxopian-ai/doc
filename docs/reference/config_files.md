@@ -140,7 +140,7 @@ management:
 
 ## **🤖 6. LLM Clients Configuration (llm-clients-config.yml)**
 
-This file manages global LLM defaults, provider bean registration, and dynamic provider bootstrapping.
+This file manages global LLM defaults and dynamic provider configuration.
 
 ### **6.1 Global Defaults & Context**
 
@@ -271,85 +271,6 @@ When tenant-specific configurations are defined, the `mergeStrategy` field contr
 #### API Secret Encryption
 
 API secrets stored in OpenSearch are encrypted using **AES-GCM**. Set the encryption key via the `APP_SECURITY_SECRET_KEY` environment variable (Base64-encoded AES key). See [Environment Variables](env_variables.md).
-
-### **6.3 Provider Bean Registration**
-
-The sections below configure the **Spring bean registration** for each provider type. These settings are used to discover and initialize the provider connectors at startup. The `api-key` and `model-name` fields here provide defaults used during bean initialization.
-
-!!! note "Runtime vs. Startup Configuration"
-    The per-provider sections below (`openai:`, `anthropic:`, etc.) register the provider **beans** in Spring. The actual runtime configuration (API keys, model lists, parameters) is managed via the **dynamic provider configuration** described above. If you have migrated to dynamic configuration, you only need the `api-key` field here to enable the bean — all other settings can be managed via the Admin API or UI.
-
-#### **OpenAI**
-
-```yml
-openai:
-  api-key: ${OPENAI_API_KEY:}
-```
-
-#### **Azure OpenAI**
-
-```yml
-azure:
-  openai:
-    api-key: ${AZURE_OPENAI_API_KEY:none}
-    endpoint: https://your-resource.openai.azure.com/
-    deployment-name: your-deployment-name
-```
-
-#### **Anthropic (Claude)**
-
-```yml
-anthropic:
-  api-key: ${ANTHROPIC_API_KEY:none}
-  base-url: https://api.anthropic.com/v1/
-```
-
-#### **AWS Bedrock**
-
-```yml
-bedrock:
-  aws:
-    access-key: ${BEDROCK_AWS_ACCESS_KEY:none}
-    secret-key: ${BEDROCK_AWS_SECRET_KEY:none}
-    region: us-east-1
-```
-
-#### **Google Gemini**
-
-```yml
-gemini:
-  api-key: ${GEMINI_API_KEY:none}
-```
-
-#### **HuggingFace**
-
-```yml
-huggingface:
-  api-key: ${HUGGINGFACE_API_KEY:none}
-```
-
-#### **Mistral AI**
-
-```yml
-mistral:
-  api-key: ${MISTRAL_API_KEY:none}
-  base-url: https://api.mistral.ai/v1/
-```
-
-#### **Ollama (Local)**
-
-```yml
-ollama:
-  base-url: http://localhost:11434
-```
-
-#### **NuExtract (Specialized)**
-
-```yml
-nu-extract:
-  api-key: ${NUEXTRACT_API_KEY:}
-  base-url: https://nuextract.ai/api/projects/
-```
 
 ## **🧩 7. Bootstrapping Prompts, Goals & LLM Providers**
 
