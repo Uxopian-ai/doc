@@ -14,32 +14,42 @@ The Starter Kit provides a ready-to-use stack containing the AI service, an Open
 
 ### 🔹 Step 1: Download and Structure
 
-Download the Download the [uxopian-ai_docker_example.zip](./uxopian-ai_docker_example_arender.zip) archive. Once extracted, you should have the following directory structure:
+!!! tip "Download"
+    **[:material-download: uxopian-ai_docker_example_arender.zip](./uxopian-ai_docker_example_arender.zip)**
+
+Once extracted, you should have the following directory structure:
 
 ```text
 .
-├── config
+├── arender/
+│   └── configurations/
+│       ├── arender-custom-client.properties  # ARender AI host & button config
+│       ├── arender-plugins.xml               # Plugin loader
+│       └── toppanel-arender-ai-configuration.xml  # AI button definitions
+├── config/
 │   ├── application.yml                 # Main Spring configuration
 │   ├── goals.yml                       # AI Goals definition
 │   ├── llm-clients-config.yml          # API Keys and Model selection (OpenAI, Mistral, etc.)
+│   ├── llm-clients-config.yml.example  # Example with all providers
 │   ├── mcp-server.yml                  # Model Context Protocol config
+│   ├── metrics.yml                     # Micrometer & Actuator config
 │   ├── opensearch.yml                  # Vector database connection
 │   └── prompts.yml                     # Pre-defined prompts
 ├── gateway-application.yaml            # Gateway config (if used)
 └── uxopian-ai-stack.yml                # The docker-compose file
-
 ```
 
 ### 🔹 Step 2: Pull Images
 
-Pull the required images (example via Cloudsmith or Artifactory):
+Pull the required images from the registry configured in your `uxopian-ai-stack.yml`:
 
 ```bash
-docker pull [docker.uxopian.com/preview/uxopian-ai:2026.0.0-ft1-rc3-full](https://docker.uxopian.com/preview/uxopian-ai:2026.0.0-ft1-rc3-full)
-docker pull [docker.uxopian.com/preview/gateway:2026.0.0-ft1-rc3-full](https://docker.uxopian.com/preview/gateway:2026.0.0-ft1-rc3-full)
-# Note: The OpenSearch image is public and will be pulled automatically by the compose file.
-
+docker pull artifactory.arondor.cloud:5001/uxopian-ai:2026.0.0-ft1-rc3-full
+# Note: The OpenSearch and ARender images will be pulled automatically by the compose file.
 ```
+
+!!! note "Registry"
+    The compose file uses `artifactory.arondor.cloud:5001/` by default. If your organization hosts images on a different registry (e.g., `docker.uxopian.com/preview/`), update the `image:` fields in `uxopian-ai-stack.yml` accordingly.
 
 ### 🔹 Step 3: Environment Variable Configuration
 
@@ -67,6 +77,9 @@ The ARender Interface (running in the user's browser) must contact the AI.
 | `APP_BASE_URL`           | Public URL of the AI application (for callbacks).       | `http://localhost:8085` |
 | `SPRING_PROFILES_ACTIVE` | Configuration profile (`dev` disables strict security). | `dev`                   |
 
+!!! info "About the `dev` Profile and the BFF Gateway"
+    This starter kit ships with `SPRING_PROFILES_ACTIVE=dev` and **no Gateway service**. This lets you call the AI service directly — missing `X-User-*` headers are filled in with defaults. In a **production** deployment, deploy the [Uxopian Gateway (BFF)](../understanding/security.md) in front of the AI service to handle authentication, role enforcement, and token propagation. The Gateway service is included in the compose file (commented out) — see the gateway block in `uxopian-ai-stack.yml`.
+
 !!! warning "Note on ARender UI"
 In the **ARender UI** container configuration, do not forget to set `UXOPIAN_AI_HOST` to the public URL of the AI (e.g., `http://localhost:8085` or `https://ai.my-domain.com`).
 
@@ -90,8 +103,12 @@ Use this method for deployment on a standard server (VM Linux/Windows) without D
 
 ### 🔹 Step 1: Installation
 
-1. Download the complete package: `ai-standalone-2026.0.0-ft1-rc3-complete-package.zip`.
-2. Unzip the archive:
+!!! tip "Download"
+    **:material-download: ai-standalone-2026.0.0-ft1-rc3-complete-package.zip**
+
+    _Contact your Uxopian representative for access to this package._
+
+Unzip the archive:
 
 ```bash
 unzip ai-standalone-2026.0.0-ft1-rc3-complete-package.zip
@@ -107,7 +124,7 @@ All files are located in the `config/` folder. You **must** edit them:
 - **`llm-clients-config.yml`**: Configure your LLM providers (Azure OpenAI, Mistral, etc.) and API keys.
 - **`application.yml`**: General settings (ports, logs).
 
-Documentation is available at: [Configuration](../../configuration/config_files/)
+Documentation is available at: [Configuration](../reference/config_files.md)
 
 ### 🔹 Step 3: Execution
 
@@ -151,21 +168,7 @@ Whether using Docker or manual installation, prepare the following files accordi
 
 Before adding the button, the AI must know what to do. Create a prompt via the API.
 
-- **URL:** `POST /api/v1/admin/prompts`
-- **Body:**
-
-```json
-{
-  "id": "summarizeDocMd",
-  "role": "user",
-  "content": "Summarize the following document: \n [[${documentService.extractTextualContent(documentId)}]]",
-  "defaultLlmProvider": "openai",
-  "defaultLlmModel": "gpt-4o",
-  "temperature": "0.7"
-}
-```
-
-_Note: `[[...]]` is a server-side instruction to inject the document text._
+See the [Managing Prompts and Goals](../how_to/managing_prompts_goals.md) guide for detailed instructions. For this ARender integration, create a prompt with ID `summarizeDocMd` that uses `[[${documentService.extractTextualContent(documentId)}]]` to extract document content.
 
 ---
 

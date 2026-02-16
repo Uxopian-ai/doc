@@ -1,7 +1,7 @@
 llm:
   # Default LLM configuration (provider, model)
   default:
-    model: ${LLM_DEFAULT_MODEL:gpt-4o}
+    model: ${LLM_DEFAULT_MODEL:gpt-5.1}
     provider: ${LLM_DEFAULT_PROVIDER:openai}
     base-prompt: ${LLM_DEFAULT_PROMPT:basePrompt}
 
@@ -15,24 +15,51 @@ openai:
   api-key: ${OPENAI_API_KEY:}
 
   # Default model for OpenAI if not specified elsewhere
-  model-name: gpt-3.5-turbo
+  model-name: gpt-5.1
 
   # Generation parameters
-  temperature: 0.7
+  temperature: 1
   timeout: 60s
   max-retries: 3
 
   # List of available models and their features
   supported-models:
+    - modelName: gpt-5.1
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gpt-5
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gpt-5-mini
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gpt-5-nano
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gpt-4.1
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gpt-4.1-mini
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gpt-4.1-nano
+      multi-modal-supported: true
+      function-call-supported: true
     - modelName: gpt-4o
+      multi-modal-supported: true
+      function-call-supported: true
+    - modelName: gpt-4o-mini
       multi-modal-supported: true
       function-call-supported: true
     - modelName: gpt-4-turbo
       multi-modal-supported: true
       function-call-supported: true
+    - modelName: o3-mini
+      multi-modal-supported: false
+      function-call-supported: true
+    - modelName: o4-mini
+      multi-modal-supported: false
+      function-call-supported: true
     - modelName: gpt-3.5-turbo
       multi-modal-supported: false
       function-call-supported: true
-    - modelName: dall-e-3
-      multi-modal-supported: false
-      function-call-supported: false
