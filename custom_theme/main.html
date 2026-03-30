@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block announce %}
+<div id="redirect-banner">
+  <svg id="redirect-banner-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+    <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.168 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+  </svg>
+  <span>
+    This documentation has moved.
+    <a href="https://doc.uxopian.com/docs/uxopian-ai/">Visit the new documentation &rarr;</a>
+  </span>
+  <button id="redirect-banner-close" aria-label="Close">&times;</button>
+</div>
+<script>
+  (function() {
+    var banner = document.getElementById('redirect-banner');
+    var mdBanner = banner.closest('.md-banner');
+    if (sessionStorage.getItem('banner-dismissed')) {
+      mdBanner.style.display = 'none';
+    }
+    document.getElementById('redirect-banner-close').addEventListener('click', function(e) {
+      e.stopPropagation();
+      mdBanner.style.display = 'none';
+      sessionStorage.setItem('banner-dismissed', '1');
+    });
+  })();
+</script>
+{% endblock %}
+
+{% block content %}
+<style>
+  /* ── Banner (inside .md-banner) ── */
+  .md-banner {
+    background: #3A3A8D;
+    color: rgba(255, 255, 255, 0.95);
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+  }
+  .md-banner__inner {
+    max-width: none;
+    padding: 0;
+  }
+  #redirect-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.45rem 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-align: center;
+    position: relative;
+    animation: bannerSlideIn 0.4s ease-out;
+  }
+  @keyframes bannerSlideIn {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+  }
+  #redirect-banner-icon {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    color: #fbbf24;
+  }
+  #redirect-banner a {
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    padding-bottom: 1px;
+    transition: border-color 0.2s;
+  }
+  #redirect-banner a:hover {
+    border-color: #fff;
+  }
+  #redirect-banner-close {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0.1rem 0.45rem;
+    line-height: 1;
+    border-radius: 4px;
+    transition: background 0.2s;
+  }
+  #redirect-banner-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  /* ── Dark mode ── */
+  [data-md-color-scheme="slate"] .md-banner {
+    background: #2a2a5e;
+  }
+</style>
+
+{{ super() }}
+{% endblock %}
